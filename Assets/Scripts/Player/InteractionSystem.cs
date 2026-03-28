@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Player
 {
@@ -12,7 +13,7 @@ namespace Player
         [Header("Configuration")]
         [SerializeField] private float interactionRadius = 2f;
         [SerializeField] private LayerMask interactableLayer;
-        [SerializeField] private KeyCode interactKey = KeyCode.E;
+
 
         // References
         private PlayerStateSystem _stateSystem;
@@ -30,9 +31,9 @@ namespace Player
             _playerTransform = playerTransform;
         }
 
-        private void Update()
+        public void OnInteract(InputValue val)
         {
-            if (Input.GetKeyDown(interactKey))
+            if (val.isPressed)
             {
                 TryInteract();
             }
