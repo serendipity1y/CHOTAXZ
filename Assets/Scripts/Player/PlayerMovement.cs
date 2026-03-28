@@ -1,6 +1,9 @@
+using System;
+using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.XR;
+
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -12,26 +15,31 @@ public class PlayerMovement : MonoBehaviour
     public float SprintSpeed = 10f;
     public float inAirSprintMultiplier = 0.5f;
 
-    public Transform orientation;
+    [SerializeField] private CinemachineCamera _cincam;
 
     private Vector2 _move;
     private float verticalVelocity;
     private bool IsSprinting;
     private bool jumpRequested;
 
+    
+
     public void OnMove(InputValue val)
     {
         _move = val.Get<Vector2>(); 
+        
     }
 
     public void OnSprint(InputValue val)
     {
         IsSprinting = val.isPressed;
+        
     }
 
     public void OnJump(InputValue val)
     {
         jumpRequested = val.isPressed;
+        
     }
 
     private void Awake()
@@ -39,11 +47,16 @@ public class PlayerMovement : MonoBehaviour
         _CC = GetComponent<CharacterController>();
     }
 
-    
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+
     void Update()
     {
         // 1. Calculate direction based on input and orientation
-        Vector3 dir = (orientation.forward * _move.y) + (orientation.right * _move.x);
+        Vector3 dir = (GetForward() * _move.y) + ( GetRight() * _move.x);
         dir.y = 0f;
 
         if (dir.sqrMagnitude > 1f)
@@ -81,4 +94,21 @@ public class PlayerMovement : MonoBehaviour
             verticalVelocity = 0f;
         }
     }
+
+    private Vector3 GetForward()
+    {
+        Vector3 forward = _cincam.transform.forward;
+        forward.y = 0;
+
+        return forward.normalized;
+    }
+    
+    private Vector3 GetRight()
+    {
+        Vector3 right = _cincam.transform.right;
+        right.y = 0;
+
+        return right.normalized;
+    }
+    
 }

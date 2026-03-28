@@ -5,84 +5,35 @@ namespace Player
 {
     /// <summary>
     /// Handles the peak meter system that forces state switches when full.
-    /// Coordinates with other systems via events.
+    /// Only manages the meter - does NOT directly call other systems.
+    /// Communicates via events only.
     /// </summary>
     public class PeakSystem : MonoBehaviour
     {
         [Header("Configuration")]
-        [SerializeField] private float peakFillRate = 0.1f; // Meter units per second
+        [SerializeField] private float peakFillRate = 0.1f;
         [SerializeField] private float maxPeakValue = 1f;
-
-        [Header("Peak Effects")]
-        [SerializeField] private float shockwaveRadius = 5f;
-        [SerializeField] private float phaseWaveDuration = 3f;
-        [SerializeField] private float phaseWaveRadius = 8f;
-        [SerializeField] private LayerMask destructibleLayer;
-        [SerializeField] private LayerMask trapLayer;
-
-        [Header("Position Validation")]
-        [SerializeField] private LayerMask solidObjectsLayer;
-        [SerializeField] private float positionCheckRadius = 0.3f;
-
-        // References (injected via Initialize or Inspector)
-        private PlayerStateSystem _stateSystem;
-        private HealthSystem _healthSystem;
-        private Transform _playerTransform;
 
         // State
         private float _currentPeakValue;
         private bool _isPeakInProgress;
         private bool _isActive = true;
+        private bool _isPaused;
 
-        // Events
+        // Events - these are the ONLY way PeakSystem communicates
         public event Action<float> OnPeakMeterChanged; // 0-1 normalized value
-        public event Action OnPeakTriggered;
-        public event Action<PlayerState> OnPeakEffectTriggered; // The state we switched FROM
+        public event Action OnPeakReached; // Fired when peak threshold is hit
 
         // Public properties
         public float CurrentPeakValue => _currentPeakValue;
+        public float MaxPeakValue => maxPeakValue; 
         public float NormalizedPeakValue => _currentPeakValue / maxPeakValue;
         public bool IsPeakInProgress => _isPeakInProgress;
-
-        /// <summary>
-        /// Initializes the system with required dependencies.
-        /// </summary>
-        public void Initialize(PlayerStateSystem stateSystem, HealthSystem healthSystem, Transform playerTransform)
-        {
-            _stateSystem = stateSystem;
-            _healthSystem = healthSystem;
-            _playerTransform = playerTransform;
-
-            // Subscribe to state changes to reset meter on manual switch
-            if (_stateSystem != null)
-            {
-                _stateSystem.OnStateChanged += OnPlayerStateChanged;
-            }
-
-            // Subscribe to death to stop the system
-            if (_healthSystem != null)
-            {
-                _healthSystem.OnDeath += OnPlayerDeath;
-            }
-        }
-
-        private void OnDestroy()
-        {
-            if (_stateSystem != null)
-            {
-                _stateSystem.OnStateChanged -= OnPlayerStateChanged;
-            }
-
-            if (_healthSystem != null)
-            {
-                _healthSystem.OnDeath -= OnPlayerDeath;
-            }
-        }
+        public bool IsActive => _isActive;
 
         private void Update()
         {
-            if (!_isActive || _isPeakInProgress) return;
-            if (_healthSystem != null && _healthSystem.IsDead) return;
+            if (!_isActive || _isPeakInProgress || _isPaused) return;
 
             UpdatePeakMeter();
         }
@@ -106,131 +57,28 @@ namespace Player
         private void TriggerPeak()
         {
             if (_isPeakInProgress) return;
-            if (_healthSystem != null && _healthSystem.IsDead) return;
 
             _isPeakInProgress = true;
-            OnPeakTriggered?.Invoke();
 
-            // Store the state we're switching FROM for the peak effect
-            PlayerState previousState = _stateSystem != null ? _stateSystem.CurrentState : PlayerState.Yin;
-
-            // 1. Force state switch
-            bool switchSucceeded = _stateSystem != null && _stateSystem.ForceSwitch();
-
-            if (!switchSucceeded)
-            {
-                // Already switching or system unavailable - abort peak
-                _isPeakInProgress = false;
-                return;
-            }
-
-            // 2. Apply damage
-            _healthSystem?.TakeDamage(1);
-
-            // Check if player died from damage
-            if (_healthSystem != null && _healthSystem.IsDead)
-            {
-                _isPeakInProgress = false;
-                return;
-            }
-
-            // 3. Start instability
-            _stateSystem?.StartInstability();
-
-            // 4. Trigger peak effect based on previous state
-            ExecutePeakEffect(previousState);
-
-            // 5. Validate position
-            if (!ValidatePosition())
-            {
-                // Invalid position - kill the player
-                _healthSystem?.Die();
-                _isPeakInProgress = false;
-                return;
-            }
-
-            // 6. Reset meter
-            ResetMeter();
-
-            _isPeakInProgress = false;
-        }
-
-        private void ExecutePeakEffect(PlayerState previousState)
-        {
-            OnPeakEffectTriggered?.Invoke(previousState);
-
-            if (previousState == PlayerState.Yin)
-            {
-                // Yin → Yang: Shockwave (destroys nearby objects)
-                ExecuteShockwave();
-            }
-            else
-            {
-                // Yang → Yin: Phase wave (disables traps)
-                ExecutePhaseWave();
-            }
-        }
-
-        private void ExecuteShockwave()
-        {
-            if (_playerTransform == null) return;
-
-            Collider[] hitColliders = Physics.OverlapSphere(
-                _playerTransform.position,
-                shockwaveRadius,
-                destructibleLayer
-            );
-
-            foreach (Collider hit in hitColliders)
-            {
-                IDestructible destructible = hit.GetComponent<IDestructible>();
-                destructible?.Destroy();
-            }
-        }
-
-        private void ExecutePhaseWave()
-        {
-            if (_playerTransform == null) return;
-
-            Collider[] hitColliders = Physics.OverlapSphere(
-                _playerTransform.position,
-                phaseWaveRadius,
-                trapLayer
-            );
-
-            foreach (Collider hit in hitColliders)
-            {
-                IDisableable disableable = hit.GetComponent<IDisableable>();
-                disableable?.DisableTemporarily(phaseWaveDuration);
-            }
+            // Fire event - let listeners handle what happens next
+            OnPeakReached?.Invoke();
         }
 
         /// <summary>
-        /// Validates if the player is in a valid position after forced switch.
-        /// Returns false if player is stuck inside solid geometry.
+        /// Signals that peak handling is complete. Called by PlayerController after processing.
         /// </summary>
-        private bool ValidatePosition()
+        public void CompletePeak()
         {
-            if (_playerTransform == null) return true;
+            ResetMeter();
+            _isPeakInProgress = false;
+        }
 
-            // Check if player overlaps with solid objects
-            Collider[] overlaps = Physics.OverlapSphere(
-                _playerTransform.position,
-                positionCheckRadius,
-                solidObjectsLayer
-            );
-
-            // Filter out triggers and the player's own colliders
-            foreach (Collider col in overlaps)
-            {
-                if (col.isTrigger) continue;
-                if (col.transform.IsChildOf(_playerTransform) || col.transform == _playerTransform) continue;
-
-                // Found a solid collider we're stuck in
-                return false;
-            }
-
-            return true;
+        /// <summary>
+        /// Aborts the current peak (e.g., if player dies during peak).
+        /// </summary>
+        public void AbortPeak()
+        {
+            _isPeakInProgress = false;
         }
 
         /// <summary>
@@ -243,23 +91,19 @@ namespace Player
         }
 
         /// <summary>
-        /// Called when player manually switches state - reset the meter.
+        /// Pauses the peak meter accumulation.
         /// </summary>
-        private void OnPlayerStateChanged(PlayerState newState)
+        public void Pause()
         {
-            // Only reset if not during a forced peak switch
-            if (!_isPeakInProgress)
-            {
-                ResetMeter();
-            }
+            _isPaused = true;
         }
 
         /// <summary>
-        /// Called when player dies - stop the system.
+        /// Resumes the peak meter accumulation.
         /// </summary>
-        private void OnPlayerDeath()
+        public void Resume()
         {
-            _isActive = false;
+            _isPaused = false;
         }
 
         /// <summary>
@@ -278,6 +122,7 @@ namespace Player
             _currentPeakValue = 0f;
             _isPeakInProgress = false;
             _isActive = true;
+            _isPaused = false;
             OnPeakMeterChanged?.Invoke(0f);
         }
     }

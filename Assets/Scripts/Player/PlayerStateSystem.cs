@@ -30,6 +30,7 @@ namespace Player
         public bool IsSwitchLocked => _isSwitchLocked;
         public bool IsInInstability => _instabilityTimer > 0f;
         public float InstabilityTimeRemaining => _instabilityTimer;
+        public float InstabilityDuration => instabilityDuration;
 
         private void Awake()
         {
@@ -47,7 +48,7 @@ namespace Player
         /// <returns>True if switch was successful, false otherwise.</returns>
         public bool TrySwitch()
         {
-            if (_isSwitchLocked || _isSwitching || IsInInstability)
+            if (!CanSwitch())
             {
                 return false;
             }
@@ -58,7 +59,16 @@ namespace Player
         }
 
         /// <summary>
-        /// Forces a state switch (called by PeakSystem). Ignores lock but not if already switching.
+        /// Switches to the specified state. Respects instability lock.
+        /// </summary>
+        /// <returns>True if switch was successful, false otherwise.</returns>
+        public bool SwitchState()
+        {
+            return TrySwitch();
+        }
+
+        /// <summary>
+        /// Forces a state switch (called during peak). Ignores lock but not if already switching.
         /// </summary>
         /// <returns>True if switch was executed, false if already switching.</returns>
         public bool ForceSwitch()
@@ -71,6 +81,28 @@ namespace Player
             PlayerState newState = GetOppositeState(_currentState);
             ExecuteSwitch(newState, isForced: true);
             return true;
+        }
+
+        /// <summary>
+        /// Sets the player to a specific state. Ignores locks.
+        /// </summary>
+        /// <param name="state">The state to set.</param>
+        public void SetState(PlayerState state)
+        {
+            if (_isSwitching || state == _currentState)
+            {
+                return;
+            }
+
+            ExecuteSwitch(state, isForced: true);
+        }
+
+        /// <summary>
+        /// Checks if the player can currently switch states.
+        /// </summary>
+        public bool CanSwitch()
+        {
+            return !_isSwitchLocked && !_isSwitching && !IsInInstability;
         }
 
         /// <summary>

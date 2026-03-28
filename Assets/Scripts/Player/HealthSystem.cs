@@ -24,10 +24,13 @@ namespace Player
         public int CurrentHealth => _currentHealth;
         public int MaxHealth => maxHealth;
         public bool IsDead => _isDead;
-
+        
+        // Game logic
+        private GameLogic _gamelogic;
         private void Awake()
         {
             _currentHealth = maxHealth;
+            _gamelogic = GameObject.FindGameObjectWithTag("Logic").GetComponent<GameLogic>();
         }
 
         /// <summary>
@@ -39,6 +42,7 @@ namespace Player
             if (_isDead || amount <= 0) return;
 
             _currentHealth = Mathf.Max(0, _currentHealth - amount);
+            _gamelogic.HealthBar.value = CurrentHealth;
             OnDamageTaken?.Invoke(amount);
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
 
@@ -58,7 +62,7 @@ namespace Player
 
             int previousHealth = _currentHealth;
             _currentHealth = Mathf.Min(maxHealth, _currentHealth + amount);
-
+            
             if (_currentHealth > previousHealth)
             {
                 OnHealed?.Invoke();
