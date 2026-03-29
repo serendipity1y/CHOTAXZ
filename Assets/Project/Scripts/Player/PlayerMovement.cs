@@ -13,7 +13,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce = 5f;
     public float gravity = -9.81f;
     public float SprintSpeed = 10f;
-    public float inAirSprintMultiplier = 0.5f;
+    public float inAirSprintMultiplier = 1f;
 
     [SerializeField] private CinemachineCamera _cincam;
 

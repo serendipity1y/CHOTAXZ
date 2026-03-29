@@ -1,7 +1,7 @@
-using System;
 using Player;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class GameLogic : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class GameLogic : MonoBehaviour
     public Slider HealthBar;
 
     public Slider PeakBar;
-    public GameObject StateBar;
+    public TextMeshProUGUI StateBar;
     private void Awake()
     {
         Player = GameObject.FindGameObjectWithTag("Player");
@@ -36,6 +36,18 @@ public class GameLogic : MonoBehaviour
         
     }
 
+    private void OnEnable()
+    {
+        _stateSystem.OnStateChanged += HandleStateChangeUI;
+        _peaksystem.OnPeakMeterChanged += HandlePeakBarChangeUI;
+    }
+
+    private void OnDisable()
+    {
+        _stateSystem.OnStateChanged -= HandleStateChangeUI;
+        _peaksystem.OnPeakMeterChanged -= HandlePeakBarChangeUI;
+    }
+
     void Start()
     {
         SetValues();
@@ -43,10 +55,20 @@ public class GameLogic : MonoBehaviour
         
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         
+    }
+
+    void HandlePeakBarChangeUI(float peakval)
+    {
+        PeakBar.value = peakval;
+    }
+
+    void HandleStateChangeUI(PlayerState newState)
+    {
+        StateBar.text = newState.ToString();
     }
 
     public void SetValues()
