@@ -32,7 +32,10 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnSprint(InputValue val)
     {
-        IsSprinting = val.isPressed;
+        if (val.isPressed)
+        {
+            IsSprinting = !IsSprinting;
+        }
         
     }
 

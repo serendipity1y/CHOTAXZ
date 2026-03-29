@@ -42,7 +42,6 @@ namespace Player
             if (_isDead || amount <= 0) return;
 
             _currentHealth = Mathf.Max(0, _currentHealth - amount);
-            _gamelogic.HealthBar.value = CurrentHealth;
             OnDamageTaken?.Invoke(amount);
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
 
