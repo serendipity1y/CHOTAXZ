@@ -5,79 +5,119 @@ using TMPro;
 
 public class GameLogic : MonoBehaviour
 {
+    [Header("Systems")]
     [SerializeField] private HealthSystem _healthSystem;
     [SerializeField] private PeakSystem _peaksystem;
     [SerializeField] private PlayerStateSystem _stateSystem;
-    
-    private GameObject Player;
-    [Header("UI")]
-    public Slider HealthBar;
 
-    public Slider PeakBar;
-    public TextMeshProUGUI StateBar;
+    [Header("UI")]
+    [SerializeField] private Slider HealthBar;
+    [SerializeField] private Slider PeakBar;
+    [SerializeField] private TextMeshProUGUI StateBar;
+    [SerializeField] private Image PeakFillImage;
+
+    [Header("Colors")]
+    [SerializeField] private Color YinColor = Color.white;
+    [SerializeField] private Color YangColor = Color.black;
+    [SerializeField] private bool SmoothColorTransition = false;
+    [SerializeField] private float ColorLerpSpeed = 10f;
+
+    private Color _targetFillColor;
+
     private void Awake()
     {
-        Player = GameObject.FindGameObjectWithTag("Player");
-        if (_healthSystem == null)
+        if (PeakFillImage == null && PeakBar != null && PeakBar.fillRect != null)
         {
-            _healthSystem = Player.GetComponent<HealthSystem>();
+            PeakFillImage = PeakBar.fillRect.GetComponent<Image>();
         }
 
-        if (_peaksystem == null)
-        {
-            _peaksystem = Player.GetComponent<PeakSystem>();
-        }
-
-        if (_stateSystem == null)
-        {
-            _stateSystem = Player.GetComponent<PlayerStateSystem>();
-        }
-        
-        
+        _targetFillColor = YinColor;
     }
 
     private void OnEnable()
     {
-        _stateSystem.OnStateChanged += HandleStateChangeUI;
-        _peaksystem.OnPeakMeterChanged += HandlePeakBarChangeUI;
+        if (_stateSystem != null)
+        {
+            _stateSystem.OnStateChanged += HandleStateChangeUI;
+        }
+
+        if (_peaksystem != null)
+        {
+            _peaksystem.OnPeakMeterChanged += HandlePeakBarChangeUI;
+        }
+
+        InitializeUI();
     }
 
     private void OnDisable()
     {
-        _stateSystem.OnStateChanged -= HandleStateChangeUI;
-        _peaksystem.OnPeakMeterChanged -= HandlePeakBarChangeUI;
+        if (_stateSystem != null)
+        {
+            _stateSystem.OnStateChanged -= HandleStateChangeUI;
+        }
+
+        if (_peaksystem != null)
+        {
+            _peaksystem.OnPeakMeterChanged -= HandlePeakBarChangeUI;
+        }
     }
 
-    void Start()
+    private void Update()
     {
-        SetValues();
-        
-        
+        if (SmoothColorTransition && PeakFillImage != null)
+        {
+            PeakFillImage.color = Color.Lerp(PeakFillImage.color, _targetFillColor, ColorLerpSpeed * Time.deltaTime);
+        }
     }
 
-    
-    void Update()
+    private void HandlePeakBarChangeUI(float peakval)
     {
-        
+        if (PeakBar != null)
+        {
+            PeakBar.value = peakval;
+        }
     }
 
-    void HandlePeakBarChangeUI(float peakval)
+    private void HandleStateChangeUI(PlayerState newState)
     {
-        PeakBar.value = peakval;
+        if (StateBar != null)
+        {
+            StateBar.text = newState.ToString();
+        }
+
+        UpdateFillColor(newState);
     }
 
-    void HandleStateChangeUI(PlayerState newState)
+    private void InitializeUI()
     {
-        StateBar.text = newState.ToString();
+        if (HealthBar != null && _healthSystem != null)
+        {
+            HealthBar.maxValue = _healthSystem.MaxHealth;
+            HealthBar.value = _healthSystem.CurrentHealth;
+        }
+
+        if (PeakBar != null && _peaksystem != null)
+        {
+            PeakBar.minValue = 0f;
+            PeakBar.maxValue = _peaksystem.MaxPeakValue;
+            PeakBar.value = _peaksystem.NormalizedPeakValue;
+        }
+
+        if (_stateSystem != null)
+        {
+            HandleStateChangeUI(_stateSystem.CurrentState);
+        }
     }
 
-    public void SetValues()
+    private void UpdateFillColor(PlayerState state)
     {
-        HealthBar.maxValue = _healthSystem.MaxHealth;
-        PeakBar.maxValue = _peaksystem.MaxPeakValue;
-        
-        HealthBar.value = _healthSystem.CurrentHealth;
-        PeakBar.value = _peaksystem.CurrentPeakValue;
+        Color desiredColor = state == PlayerState.Yin ? YinColor : YangColor;
+
+        _targetFillColor = desiredColor;
+
+        if (!SmoothColorTransition && PeakFillImage != null)
+        {
+            PeakFillImage.color = desiredColor;
+        }
     }
-    
 }
