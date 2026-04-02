@@ -50,7 +50,7 @@ namespace Obstacles
 
             // Find player's health system and apply damage
             // Note: In a real scenario, you'd cache this reference
-            var player = FindObjectOfType<PlayerController>();
+            var player = GameManager.Instance.Player;
             if (player != null)
             {
                 player.HealthSystem.TakeDamage(damage);

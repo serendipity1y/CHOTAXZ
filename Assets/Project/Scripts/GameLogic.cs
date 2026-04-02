@@ -28,7 +28,7 @@ public class GameLogic : MonoBehaviour
 
     private void Awake()
     {
-        _player = GameObject.FindGameObjectWithTag("Player");
+        _player = GameManager.Instance.Player.gameObject;
         
         if (_healthSystem == null && _player != null)
             _healthSystem = _player.GetComponent<HealthSystem>();

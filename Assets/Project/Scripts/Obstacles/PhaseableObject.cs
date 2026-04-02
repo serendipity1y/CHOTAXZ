@@ -21,7 +21,7 @@ namespace Obstacles
         private void Start()
         {
             // Find player and subscribe to state changes
-            _player = FindObjectOfType<PlayerController>();
+            _player = GameManager.Instance.Player;
             if (_player != null)
             {
                 _player.StateSystem.OnStateChanged += OnPlayerStateChanged;

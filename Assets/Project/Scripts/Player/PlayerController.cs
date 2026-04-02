@@ -43,6 +43,7 @@ namespace Player
         private void Awake()
         {
             // Get system references
+            GameManager.Instance.RegisterPlayer(this);
             _stateSystem = GetComponent<PlayerStateSystem>();
             _healthSystem = GetComponent<HealthSystem>();
             _peakSystem = GetComponent<PeakSystem>();
