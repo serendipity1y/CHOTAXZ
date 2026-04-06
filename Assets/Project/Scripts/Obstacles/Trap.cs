@@ -1,5 +1,6 @@
 using UnityEngine;
 using Player;
+using System.Collections;
 
 namespace Obstacles
 {
@@ -12,10 +13,24 @@ namespace Obstacles
         [Header("Configuration")]
         [SerializeField] private int damage = 1;
         [SerializeField] private float cooldown = 1f;
-
+        private MaterialPropertyBlock _materialPropertyBlock;
+        private static readonly int ColorID = Shader.PropertyToID("_BaseColor");
+        private GameObject _GB;
+        private Color _originalColor;
+        private Renderer _render;
         private bool _isDisabled;
         private float _disableTimer;
         private float _cooldownTimer;
+        
+        private void Awake() 
+        {
+            _GB = this.gameObject;
+            _render = GetComponent<Renderer>();
+            _materialPropertyBlock = new MaterialPropertyBlock();
+
+            _render.GetPropertyBlock(_materialPropertyBlock);
+            _originalColor = _materialPropertyBlock.GetColor(ColorID);
+        }
 
         private void Update()
         {
@@ -26,6 +41,7 @@ namespace Obstacles
                 if (_disableTimer <= 0f)
                 {
                     _isDisabled = false;
+                    SetColor(_originalColor);
                 }
             }
 
@@ -40,6 +56,8 @@ namespace Obstacles
         {
             _isDisabled = true;
             _disableTimer = duration;
+
+            SetColor(Color.gray);
         }
 
         public void Interact(PlayerState state)
@@ -56,6 +74,13 @@ namespace Obstacles
                 player.HealthSystem.TakeDamage(damage);
                 _cooldownTimer = cooldown;
             }
+        }
+
+        private void SetColor(Color color)
+        {
+            _render.GetPropertyBlock(_materialPropertyBlock);
+            _materialPropertyBlock.SetColor(ColorID, color);
+            _render.SetPropertyBlock(_materialPropertyBlock);
         }
 
         private void OnTriggerStay(Collider other)

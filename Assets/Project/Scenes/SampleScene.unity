@@ -523,7 +523,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
@@ -1140,6 +1140,7 @@ GameObject:
   m_Component:
   - component: {fileID: 542871242}
   - component: {fileID: 542871241}
+  - component: {fileID: 542871243}
   m_Layer: 0
   m_Name: Game Logic
   m_TagString: Logic
@@ -1184,6 +1185,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &542871243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 542871240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d12435aeceb77664a972cd009eaafddd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  playerController: {fileID: 570861129}
 --- !u!114 &558009159
 MonoBehaviour:
   m_ObjectHideFlags: 0

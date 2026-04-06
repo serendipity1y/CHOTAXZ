@@ -65,6 +65,14 @@ namespace Player
             }
         }
 
+        private void OnDrawGizmosSelected()
+        {
+            if (_playerTransform == null) return;
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(_playerTransform.position, interactionRadius);
+        }
+
         /// <summary>
         /// Gets all interactable objects within range.
         /// </summary>
