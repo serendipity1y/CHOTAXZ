@@ -36,6 +36,7 @@ namespace Player
             if (val.isPressed)
             {
                 TryInteract();
+                Debug.Log("Interact button works");
             }
         }
 
@@ -53,7 +54,7 @@ namespace Player
             );
 
             PlayerState currentState = _stateSystem.CurrentState;
-
+            
             foreach (Collider hit in hitColliders)
             {
                 IStateInteractable interactable = hit.GetComponent<IStateInteractable>();

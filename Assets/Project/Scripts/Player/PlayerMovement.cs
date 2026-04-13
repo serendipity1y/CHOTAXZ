@@ -8,12 +8,15 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     private CharacterController _CC;
+    private Animator animator;
+
     [Header("Movement")]
     public float speed = 5f;
     public float jumpForce = 5f;
     public float gravity = -9.81f;
     public float SprintSpeed = 10f;
     public float inAirSprintMultiplier = 1f;
+    public float speedPercent = 0f;
 
     [SerializeField] private CinemachineCamera _cincam;
 
@@ -21,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     private float verticalVelocity;
     private bool IsSprinting;
     private bool jumpRequested;
+    private bool didJump;
 
     
 
@@ -48,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _CC = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     private void Start()
@@ -82,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 verticalVelocity = jumpForce;
                 jumpRequested = false; // Reset jump so we don't double jump
+                didJump = true;
             }
         }
 
@@ -96,6 +102,17 @@ public class PlayerMovement : MonoBehaviour
         {
             verticalVelocity = 0f;
         }
+
+        if (IsSprinting) speedPercent = 1f;
+
+        animator.SetFloat("Speed", speedPercent, 0.1f, Time.deltaTime);
+        animator.SetFloat("MotionSpeed", speedPercent);
+
+        animator.SetBool("Grounded", isGrounded);
+        animator.SetBool("FreeFall", !isGrounded && verticalVelocity < 0);
+        animator.SetBool("Jump", didJump);
+        didJump = false;        
+        
     }
 
     private Vector3 GetForward()

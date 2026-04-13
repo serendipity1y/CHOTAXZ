@@ -1,6 +1,7 @@
 using Player;
 using UnityEngine;
 
+[DefaultExecutionOrder(-100)]
 public class GameManager : MonoBehaviour
 {
 
@@ -18,7 +19,6 @@ public class GameManager : MonoBehaviour
         }
 
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
     public void RegisterPlayer(PlayerController player)
     {

@@ -92,6 +92,7 @@ namespace Obstacles
             if (controller != null && controller.StateSystem.CurrentState == PlayerState.Yang)
             {
                 controller.HealthSystem.TakeDamage(damage);
+                Debug.Log("Нанесен урон: " + damage);
                 _cooldownTimer = cooldown;
             }
         }

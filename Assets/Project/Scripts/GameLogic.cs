@@ -43,6 +43,7 @@ public class GameLogic : MonoBehaviour
             _peakBarFillImage = PeakBar.fillRect.GetComponent<Image>();
     }
 
+
     private void OnEnable()
     {
         SubscribeToEvents();
@@ -56,6 +57,8 @@ public class GameLogic : MonoBehaviour
     private void Start()
     {
         // Re-subscribe in case Awake found references after OnEnable
+
+
         SubscribeToEvents();
         UpdateUI();
         InitializeStateColor();
