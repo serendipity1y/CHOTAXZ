@@ -131,4 +131,13 @@ public class PlayerMovement : MonoBehaviour
         return right.normalized;
     }
     
+    public void OnFootstep()
+    {
+        // Execute footstep logic here
+    }
+
+    public void OnLand()
+    {
+        // Execute landing logic here
+    }
 }
