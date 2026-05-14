@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4089420891068867216}
   - component: {fileID: 1277718063825277491}
   - component: {fileID: 706743705894835244}
+  - component: {fileID: 6449485057276698869}
   m_Layer: 9
   m_Name: Interactable
   m_TagString: Untagged
@@ -67,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 989f2f08bc67e0e4ebd1acb34850ee73, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -112,3 +113,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6449485057276698869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8907402688869307128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d91b09ea7bdf754a863f48b57e86e00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player.TestINteract
+  onYinInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onYangInteract:
+    m_PersistentCalls:
+      m_Calls: []

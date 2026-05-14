@@ -1114,7 +1114,6 @@ GameObject:
   - component: {fileID: 7276472420865233735}
   - component: {fileID: 7759142275422814797}
   - component: {fileID: 956423969836863244}
-  - component: {fileID: 966038052064141103}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -1284,21 +1283,6 @@ HingeJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &966038052064141103
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8428959525311799679}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5afc06378ce36eb41bbfd750a96c20c6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WhipController
-  firstSegment: {fileID: 7759142275422814797}
-  force: 500
-  owner: {fileID: 0}
 --- !u!1 &8503011773342718966
 GameObject:
   m_ObjectHideFlags: 0

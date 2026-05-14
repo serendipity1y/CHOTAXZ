@@ -30,7 +30,7 @@ namespace Player
             _stateSystem = stateSystem;
             _playerTransform = playerTransform;
         }
-
+ 
         public void OnInteract(InputValue val)
         {
             if (val.isPressed)

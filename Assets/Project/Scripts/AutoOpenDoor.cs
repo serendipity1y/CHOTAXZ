@@ -4,6 +4,7 @@ public class DoorAuto : MonoBehaviour
 {
     public HingeJoint hinge;
     public float openSpeed = 200f;
+    private bool canOpen;
 
     private JointMotor motor;
 
@@ -15,6 +16,7 @@ public class DoorAuto : MonoBehaviour
 
     public void Open()
     {
+        if (!canOpen) return;
         Debug.Log("Opened");
         motor.targetVelocity = openSpeed;
         hinge.motor = motor;
@@ -23,6 +25,7 @@ public class DoorAuto : MonoBehaviour
 
     public void Close()
     {
+        if (!canOpen) return;
         Debug.Log("Closed");
         motor.targetVelocity = -openSpeed;
         hinge.motor = motor;

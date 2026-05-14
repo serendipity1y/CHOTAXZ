@@ -196,5 +196,10 @@ public class GameLogic : MonoBehaviour
         Time.timeScale = 0f; // pause
         gameOverPanel.SetActive(true);
     }
+
+    public void NextLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
     
 }
