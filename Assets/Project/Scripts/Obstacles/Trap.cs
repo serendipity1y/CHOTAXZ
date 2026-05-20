@@ -22,10 +22,10 @@ namespace Obstacles
         private float _disableTimer;
         private float _cooldownTimer;
         
-        private void Awake() 
+        private void Awake()
         {
             _GB = this.gameObject;
-            _render = GetComponent<Renderer>();
+            _render = GetComponentInChildren<Renderer>();
             _materialPropertyBlock = new MaterialPropertyBlock();
 
             _render.GetPropertyBlock(_materialPropertyBlock);
