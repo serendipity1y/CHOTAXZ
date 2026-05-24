@@ -1,60 +1,76 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterController))]
 public class PlayerWhip : MonoBehaviour
 {
-    public Transform handPoint;
-    private WhipController currentWhip;
+    [Header("References")]
+    [SerializeField] private Transform _handPoint;
+    [SerializeField] private GameObject _whipPrefab; // prefab просто с LineRenderer + WhipController
 
-    public float cooldown = 0.5f;
-    private float lastAttack;
+    [Header("Settings")]
+    [SerializeField] private LayerMask _attachableLayers;
+    [SerializeField] private float _cooldown = 0.5f;
 
-    public void EquipWhip(GameObject whipPrefab)
+    private CharacterController _cc;
+    private WhipController _currentWhip;
+    private float _lastAttackTime;
+
+    private void Awake()
     {
-        if (currentWhip != null)
-        {
-            Destroy(currentWhip.gameObject);
-        }
-
-        GameObject whip = Instantiate(whipPrefab, handPoint);
-        whip.transform.localPosition = Vector3.zero;
-        whip.transform.localRotation = Quaternion.identity;
-        
-        currentWhip = whip.GetComponent<WhipController>();
-        if (currentWhip == null)
-        {
-            currentWhip = whip.AddComponent<WhipController>();
-        }
-        
-        currentWhip.owner = this;
-        
-        // Remove hover if it exists on the equipped version
-        SimpleHover hover = whip.GetComponent<SimpleHover>();
-        if (hover != null) Destroy(hover);
-
-        // Hide mesh renderers of segments and improve physics
-        MeshRenderer[] renderers = whip.GetComponentsInChildren<MeshRenderer>();
-        foreach (var mr in renderers) mr.enabled = false;
-
-        Rigidbody[] rbs = whip.GetComponentsInChildren<Rigidbody>();
-        foreach (var rb in rbs)
-        {
-            rb.linearDamping = 2f;
-            rb.angularDamping = 2f;
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
-        }
+        _cc = GetComponent<CharacterController>();
     }
 
-    public void OnAttack(InputAction.CallbackContext context)
+    private void Start()
     {
-        if (context.performed)
-        {
-            if (Time.time < lastAttack + cooldown) return;
-            if (currentWhip == null) return;
+        EquipWhip(_whipPrefab);
+    }
 
-            lastAttack = Time.time;
-            currentWhip.OnAttack();
+    // Можно вызвать из Start или из системы инвентаря
+    public void EquipWhip(GameObject whipPrefab)
+    {
+        if (_currentWhip != null)
+            Destroy(_currentWhip.gameObject);
+
+        GameObject whipGO = Instantiate(whipPrefab, _handPoint);
+        whipGO.transform.localPosition = Vector3.zero;
+        whipGO.transform.localRotation = Quaternion.identity;
+
+        // LineRenderer — минимальная настройка
+        LineRenderer lr = whipGO.AddComponent<LineRenderer>();
+        lr.startWidth = 0.1f;
+        lr.endWidth = 0.08f;
+        // Определяй шейдер правильно
+        Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader == null) shader = Shader.Find("Unlit/Color"); // fallback для Built-in
+        lr.material = new Material(shader);
+        lr.startColor = new Color(0.5f, 0.28f, 0.08f);
+        lr.endColor = new Color(0.25f, 0.12f, 0.04f);
+
+        lr.useWorldSpace = true;
+        lr.numCapVertices = 4;
+
+        _currentWhip = whipGO.AddComponent<WhipController>();
+        _currentWhip.whipOrigin = _handPoint;
+        _currentWhip.characterController = _cc;
+        _currentWhip.playerTransform = transform;
+        _currentWhip.PlayerMovement = GameManager.Instance.Movement;
+        _currentWhip.SetLayers(_attachableLayers);
+    }
+
+    // Input System — назначь в Player Input компоненте
+    public void OnAttack(InputValue value)
+    {
+        if (_currentWhip == null) return;
+        if (Time.time < _lastAttackTime + _cooldown) return;
+
+        if (value.isPressed)
+        {
+            if(_currentWhip.IsAttached)
+                _currentWhip.Retract();
+            else
+                _currentWhip.Throw();
         }
     }
 }
-

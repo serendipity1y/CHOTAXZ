@@ -26,6 +26,8 @@ public class PlayerMovement : MonoBehaviour
     private bool jumpRequested;
     private bool didJump;
 
+    public Vector2 MoveInput => _move;
+
     
 
     public void OnMove(InputValue val)
@@ -53,6 +55,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _CC = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        GameManager.Instance.RegisterPlayerMovement(this);
     }
 
     private void Start()
@@ -103,7 +106,7 @@ public class PlayerMovement : MonoBehaviour
             verticalVelocity = 0f;
         }
 
-        if (IsSprinting) speedPercent = 1f;
+        speedPercent = IsSprinting ? 1f : _move.magnitude;
 
         animator.SetFloat("Speed", speedPercent, 0.1f, Time.deltaTime);
         animator.SetFloat("MotionSpeed", speedPercent);
@@ -111,7 +114,12 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("Grounded", isGrounded);
         animator.SetBool("FreeFall", !isGrounded && verticalVelocity < 0);
         animator.SetBool("Jump", didJump);
-        didJump = false;        
+        didJump = false;       
+        
+        // В конце Update()
+        Vector3 camForward = Vector3.ProjectOnPlane(_cincam.transform.forward, Vector3.up).normalized;
+        if (camForward != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(camForward);
         
     }
 

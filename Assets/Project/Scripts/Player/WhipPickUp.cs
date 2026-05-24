@@ -1,16 +1,15 @@
 using UnityEngine;
 
+// WhipPickup — остаётся как есть
+// WhipPickup
 public class WhipPickup : MonoBehaviour
 {
-    public GameObject whipPrefab;
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             PlayerWhip playerWhip = other.GetComponent<PlayerWhip>();
-            playerWhip.EquipWhip(whipPrefab);
-
+            playerWhip.EquipWhip(null);
             Destroy(gameObject);
         }
     }

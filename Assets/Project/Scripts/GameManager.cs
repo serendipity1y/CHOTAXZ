@@ -7,8 +7,11 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance { get; private set; }
     [SerializeField] private PlayerController playerController;
+    private PlayerMovement playerMovement;
     
     public PlayerController Player => playerController;
+
+    public PlayerMovement Movement => playerMovement;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void Awake()
     {
@@ -28,6 +31,16 @@ public class GameManager : MonoBehaviour
             return;
         }
         playerController = player;
+    }
+
+    public void RegisterPlayerMovement(PlayerMovement movement)
+    {
+        if (playerMovement != null)
+        {
+            return;
+        }
+
+        playerMovement = movement;
     }
     void Start()
     {
