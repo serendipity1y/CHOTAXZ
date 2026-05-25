@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,7 +24,6 @@ public class PlayerWhip : MonoBehaviour
     [SerializeField] private WhipSlotConfig _secondary;
 
     private CharacterController _cc;
-
     private WhipController[] _whips = new WhipController[2];
     private float[] _lastAttackTime = new float[2];
 
@@ -36,10 +36,8 @@ public class PlayerWhip : MonoBehaviour
     {
         if (_primary.whipPrefab != null)
             EquipWhip(WhipSlot.Primary, _primary.whipPrefab);
-        // Secondary не экипируем — выдаётся по ходу игры
     }
 
-    // Вызывается из системы прогрессии / инвентаря
     public void EquipWhip(WhipSlot slot, GameObject whipPrefab)
     {
         int i = (int)slot;
@@ -58,32 +56,33 @@ public class PlayerWhip : MonoBehaviour
         whipGO.transform.localPosition = Vector3.zero;
         whipGO.transform.localRotation = Quaternion.identity;
 
-        LineRenderer lr = whipGO.AddComponent<LineRenderer>();
-        lr.startWidth = 0.1f;
-        lr.endWidth = 0.08f;
-        lr.useWorldSpace = true;
-        lr.numCapVertices = 4;
+        // Берём существующий компонент с prefab'а, не добавляем второй
+        WhipController whip = whipGO.GetComponent<WhipController>();
+        if (whip == null)
+            whip = whipGO.AddComponent<WhipController>();
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Unlit")
-                    ?? Shader.Find("Unlit/Color");
-        
-        lr.material = new Material(shader);
-        lr.startColor = new Color(105, 44, 1);
-        lr.endColor   = new Color(105, 44, 1);
-
-        WhipController whip = whipGO.AddComponent<WhipController>();
-        whip.whipOrigin        = cfg.handPoint;
+        whip.whipOrigin          = cfg.handPoint;
         whip.characterController = _cc;
-        whip.playerTransform   = transform;
-        whip.PlayerMovement    = GameManager.Instance.Movement;
+        whip.playerTransform     = transform;
+        whip.PlayerMovement      = GameManager.Instance.Movement;
         whip.SetLayers(cfg.attachableLayers, cfg.interactableLayers);
+
+        // Автоназначение костей по имени bone_0, bone_1, ...
+        var boneList = new List<Transform>();
+        for (int j = 0; ; j++)
+        {
+            Transform bone = FindDeep(whipGO.transform, $"bone_{j}");
+            if (bone == null) break;
+            boneList.Add(bone);
+        }
+
+        if (boneList.Count > 0)
+            whip.SetBones(boneList.ToArray());
+        else
+            Debug.LogWarning($"[PlayerWhip] No bones found in prefab for slot {slot}");
 
         _whips[i] = whip;
     }
-
-    // Input System callbacks — привязывай в Player Input:
-    //   Attack        → OnAttack        (RMB / primary)
-    //   AttackSecondary → OnAttackSecondary (LMB / secondary)
 
     public void OnAttack(InputValue value)
     {
@@ -115,4 +114,11 @@ public class PlayerWhip : MonoBehaviour
 
     private float GetCooldown(WhipSlot slot) =>
         slot == WhipSlot.Primary ? _primary.cooldown : _secondary.cooldown;
+
+    private static Transform FindDeep(Transform parent, string name)
+    {
+        foreach (Transform child in parent.GetComponentsInChildren<Transform>())
+            if (child.name == name) return child;
+        return null;
+    }
 }
