@@ -1,0 +1,23 @@
+{
+    "asset": "32b95f1c25230e241b71e7fcfe7a6820",
+    "fileName": "019e5e3a-27c2-70ae-bca2-b24ba76cf7e0.glb",
+    "prompt": "3D ancient temple stone column, carved with coiled-dragon spiral relief from base to capital, fluted shaft, lotus-petal base, weathered grey sandstone, painted cinnabar lacquer mostly flaked away exposing stone, thick jungle vines spiralling up the shaft, moss collar at the base, top broken off jagged, ~5m tall, painterly stylized PBR.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "70019f9b0d766cf4b8d15e5490dddc99",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

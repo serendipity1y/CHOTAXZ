@@ -1,21 +1,31 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerWhip : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private Transform _handPoint;
-    [SerializeField] private GameObject _whipPrefab; // prefab просто с LineRenderer + WhipController
+    public enum WhipSlot { Primary = 0, Secondary = 1 }
 
-    [Header("Settings")]
-    [SerializeField] private LayerMask _attachableLayers;
-    [SerializeField] private float _cooldown = 0.5f;
+    [System.Serializable]
+    private struct WhipSlotConfig
+    {
+        public Transform handPoint;
+        public GameObject whipPrefab;
+        public LayerMask attachableLayers;
+        public LayerMask interactableLayers;
+        public float cooldown;
+    }
+
+    [Header("Primary Whip (RMB)")]
+    [SerializeField] private WhipSlotConfig _primary;
+
+    [Header("Secondary Whip (LMB)")]
+    [SerializeField] private WhipSlotConfig _secondary;
 
     private CharacterController _cc;
-    private WhipController _currentWhip;
-    private float _lastAttackTime;
+
+    private WhipController[] _whips = new WhipController[2];
+    private float[] _lastAttackTime = new float[2];
 
     private void Awake()
     {
@@ -24,53 +34,85 @@ public class PlayerWhip : MonoBehaviour
 
     private void Start()
     {
-        EquipWhip(_whipPrefab);
+        if (_primary.whipPrefab != null)
+            EquipWhip(WhipSlot.Primary, _primary.whipPrefab);
+        // Secondary не экипируем — выдаётся по ходу игры
     }
 
-    // Можно вызвать из Start или из системы инвентаря
-    public void EquipWhip(GameObject whipPrefab)
+    // Вызывается из системы прогрессии / инвентаря
+    public void EquipWhip(WhipSlot slot, GameObject whipPrefab)
     {
-        if (_currentWhip != null)
-            Destroy(_currentWhip.gameObject);
+        int i = (int)slot;
+        WhipSlotConfig cfg = slot == WhipSlot.Primary ? _primary : _secondary;
 
-        GameObject whipGO = Instantiate(whipPrefab, _handPoint);
+        if (_whips[i] != null)
+            Destroy(_whips[i].gameObject);
+
+        if (cfg.handPoint == null)
+        {
+            Debug.LogWarning($"[PlayerWhip] handPoint not set for slot {slot}");
+            return;
+        }
+
+        GameObject whipGO = Instantiate(whipPrefab, cfg.handPoint);
         whipGO.transform.localPosition = Vector3.zero;
         whipGO.transform.localRotation = Quaternion.identity;
 
-        // LineRenderer — минимальная настройка
         LineRenderer lr = whipGO.AddComponent<LineRenderer>();
         lr.startWidth = 0.1f;
         lr.endWidth = 0.08f;
-        // Определяй шейдер правильно
-        Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader == null) shader = Shader.Find("Unlit/Color"); // fallback для Built-in
-        lr.material = new Material(shader);
-        lr.startColor = new Color(0.5f, 0.28f, 0.08f);
-        lr.endColor = new Color(0.25f, 0.12f, 0.04f);
-
         lr.useWorldSpace = true;
         lr.numCapVertices = 4;
 
-        _currentWhip = whipGO.AddComponent<WhipController>();
-        _currentWhip.whipOrigin = _handPoint;
-        _currentWhip.characterController = _cc;
-        _currentWhip.playerTransform = transform;
-        _currentWhip.PlayerMovement = GameManager.Instance.Movement;
-        _currentWhip.SetLayers(_attachableLayers);
+        Shader shader = Shader.Find("Universal Render Pipeline/Unlit")
+                    ?? Shader.Find("Unlit/Color");
+        
+        lr.material = new Material(shader);
+        lr.startColor = new Color(105, 44, 1);
+        lr.endColor   = new Color(105, 44, 1);
+
+        WhipController whip = whipGO.AddComponent<WhipController>();
+        whip.whipOrigin        = cfg.handPoint;
+        whip.characterController = _cc;
+        whip.playerTransform   = transform;
+        whip.PlayerMovement    = GameManager.Instance.Movement;
+        whip.SetLayers(cfg.attachableLayers, cfg.interactableLayers);
+
+        _whips[i] = whip;
     }
 
-    // Input System — назначь в Player Input компоненте
+    // Input System callbacks — привязывай в Player Input:
+    //   Attack        → OnAttack        (RMB / primary)
+    //   AttackSecondary → OnAttackSecondary (LMB / secondary)
+
     public void OnAttack(InputValue value)
     {
-        if (_currentWhip == null) return;
-        if (Time.time < _lastAttackTime + _cooldown) return;
-
-        if (value.isPressed)
-        {
-            if(_currentWhip.IsAttached)
-                _currentWhip.Retract();
-            else
-                _currentWhip.Throw();
-        }
+        HandleInput(WhipSlot.Primary, value.isPressed);
     }
+
+    public void OnAttackSecondary(InputValue value)
+    {
+        HandleInput(WhipSlot.Secondary, value.isPressed);
+    }
+
+    private void HandleInput(WhipSlot slot, bool pressed)
+    {
+        if (!pressed) return;
+
+        int i = (int)slot;
+        WhipController whip = _whips[i];
+
+        if (whip == null) return;
+        if (Time.time < _lastAttackTime[i] + GetCooldown(slot)) return;
+
+        _lastAttackTime[i] = Time.time;
+
+        if (whip.IsAttached)
+            whip.Retract();
+        else
+            whip.Throw();
+    }
+
+    private float GetCooldown(WhipSlot slot) =>
+        slot == WhipSlot.Primary ? _primary.cooldown : _secondary.cooldown;
 }

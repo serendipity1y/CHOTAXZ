@@ -1,0 +1,23 @@
+{
+    "asset": "34419c233939c1a469a5e1e52812de75",
+    "fileName": "019e5dd7-6939-7efc-b509-41a0a105e3ea.glb",
+    "prompt": "3D model of a mechanical button base, square frame, hollow center, matching the reference image.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "0d2569fb302e06c4991df0b10d793d53",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

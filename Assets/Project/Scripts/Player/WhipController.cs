@@ -29,9 +29,21 @@ public class WhipController : MonoBehaviour
     private VerletRope _rope;
 
     private WhipState _state = WhipState.Idle;
+
+    // Точка attach — определяется в момент броска (precast), либо tip в момент miss
     private Vector3 _attachPoint;
-    private Vector3 _tipTarget;
+
+    // Откуда ретрактим (фиксируется в момент перехода в Retracting)
+    private Vector3 _retractFromTip;
+
+    // Направление броска (нормаль от origin к tipTarget)
+    private Vector3 _throwDirection;
+
+    // Текущая длина развёрнутой верёвки (0 → _ropeLength)
     private float _currentLength;
+
+    // Есть ли цель для attach (определяется precast'ом в Throw())
+    private bool _hasAttachTarget;
 
     // Swing state
     private Vector3 _swingVelocity;
@@ -51,32 +63,70 @@ public class WhipController : MonoBehaviour
     private void Update()
     {
         if (whipOrigin == null) return;
-        
+
         UpdateStateMachine();
         UpdateRopeVisual();
     }
 
-    // Вызывается из PlayerWhip.OnAttack
     public void Throw()
     {
         if (_state != WhipState.Idle) return;
 
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        _rope.Initialize(whipOrigin.position, whipOrigin.position + ray.direction * 0.1f);
-        Vector3 aimPoint = ray.GetPoint(_ropeLength);
-        Vector3 direction = (aimPoint - whipOrigin.position).normalized;
-        
-        _tipTarget = whipOrigin.position + direction * _ropeLength;
+        _throwDirection = ray.direction;
+
+        LayerMask combinedMask = _attachableLayers | _interactableLayers;
+
+        if (Physics.SphereCast(
+                whipOrigin.position,
+                _attachRadius,
+                _throwDirection,
+                out RaycastHit hit,
+                _ropeLength,
+                combinedMask))
+        {
+            _attachPoint = hit.point;
+
+            int hitLayer = 1 << hit.collider.gameObject.layer;
+            bool isAttachable   = (hitLayer & _attachableLayers.value)   != 0;
+            bool isInteractable = (hitLayer & _interactableLayers.value) != 0;
+
+            // IWhipInteractable вызывается независимо от attach
+            if (isInteractable)
+                hit.collider.GetComponent<IWhipInteractable>()?.OnWhipHit();
+
+            _hasAttachTarget = isAttachable;
+        }
+        else
+        {
+            _attachPoint = whipOrigin.position + _throwDirection * _ropeLength;
+            _hasAttachTarget = false;
+        }
+
+        _rope.Initialize(whipOrigin.position, whipOrigin.position + _throwDirection * 0.1f);
         _currentLength = 0f;
         _state = WhipState.Throwing;
     }
 
-    // Вызывается из PlayerWhip при отпускании кнопки
     public void Retract()
     {
         if (_state == WhipState.Idle) return;
+
+        // Фиксируем текущий tip как начало ретракта
+        if (_state == WhipState.Throwing)
+            _retractFromTip = whipOrigin.position + _throwDirection * _currentLength;
+        else if (_state == WhipState.Attached)
+            _retractFromTip = _attachPoint;
+        // Если уже Retracting — не трогаем _retractFromTip
+
         _swingVelocity = Vector3.zero;
         _state = WhipState.Retracting;
+    }
+
+    public void SetLayers(LayerMask attachable, LayerMask interactable)
+    {
+        _attachableLayers = attachable;
+        _interactableLayers = interactable;
     }
 
     private void UpdateStateMachine()
@@ -89,95 +139,65 @@ public class WhipController : MonoBehaviour
         }
     }
 
-    public void SetLayers(LayerMask attachable)
-    {
-        _attachableLayers = attachable;
-    }
-
     private void UpdateThrowing()
     {
-        if (whipOrigin == null) return;
-        _currentLength = Mathf.MoveTowards(_currentLength, _ropeLength, _throwSpeed * Time.deltaTime);
+        float targetLength = Vector3.Distance(whipOrigin.position, _attachPoint);
+        _currentLength = Mathf.MoveTowards(_currentLength, targetLength, _throwSpeed * Time.deltaTime);
 
-        Vector3 direction = (_tipTarget - whipOrigin.position).normalized;
-        Vector3 currentTip = whipOrigin.position + direction * _currentLength;
-
+        Vector3 currentTip = whipOrigin.position + _throwDirection * _currentLength;
         _rope.Simulate(whipOrigin.position, currentTip, _gravity * 0.2f, _damping);
 
-        if (_currentLength >= _ropeLength * 0.95f)
-            CheckAttach(currentTip, direction);
-    }
-
-    private void CheckAttach(Vector3 tipPosition, Vector3 direction)
-    {
-        Debug.DrawRay(tipPosition, direction, Color.red, 1f);
-        Debug.Log($"CheckAttach | layers: {_attachableLayers.value}");
-        
-        if (Physics.SphereCast(
-            tipPosition - direction * 0.5f,
-            _attachRadius,
-            direction,
-            out RaycastHit hit,
-            1f,
-            _attachableLayers))
+        if (_currentLength >= targetLength - 0.05f)
         {
-            _attachPoint = hit.point;
-            _state = WhipState.Attached;
+            if (_hasAttachTarget)
+            {
+                _retractFromTip = _attachPoint;
+                _state = WhipState.Attached;
 
-            // Сохраняем текущую скорость CC как начальную для свинга
-            // (если есть доступ — можно получить снаружи)
-            _swingVelocity = characterController != null
-                ? characterController.velocity
-                : Vector3.zero;
-
-            IWhipInteractable interactable = hit.collider.GetComponent<IWhipInteractable>();
-            interactable?.OnWhipHit();
-        }
-        else
-        {
-            _state = WhipState.Retracting;
+                _swingVelocity = characterController != null
+                    ? characterController.velocity
+                    : Vector3.zero;
+            }
+            else
+            {
+                _retractFromTip = currentTip;
+                _state = WhipState.Retracting;
+            }
         }
     }
 
     private void UpdateSwing()
     {
-        if (whipOrigin == null) return;
         if (characterController == null) return;
 
         Vector3 playerPos = playerTransform.position;
         Vector3 toAnchor = _attachPoint - playerPos;
-        float ropeDistance = Vector3.Distance(playerPos, _attachPoint);
+        float ropeDistance = toAnchor.magnitude;
 
-        // Гравитация
         _swingVelocity += Physics.gravity * Time.deltaTime;
-        
-        // Убираем компоненту velocity которая растягивает верёвку
-        // (constraint: держим дистанцию постоянной)
+
+        // Constraint: убираем компоненту velocity, удлиняющую верёвку
         if (ropeDistance > 0.01f)
         {
             Vector3 ropeDir = toAnchor.normalized;
             float radialVelocity = Vector3.Dot(_swingVelocity, ropeDir);
-
-            // Если игрок отдаляется от точки — убираем эту компоненту
             if (radialVelocity < 0)
                 _swingVelocity -= ropeDir * radialVelocity;
         }
 
-        // Дополнительное управление во время свинга (A/D)
-        Vector3 inputDir = GetSwingInput();
-        _swingVelocity += inputDir * _swingForce * Time.deltaTime;
+        _swingVelocity += GetSwingInput() * _swingForce * Time.deltaTime;
 
         characterController.Move(_swingVelocity * Time.deltaTime);
 
-        // Корректируем позицию чтобы не выходить за длину верёвки
+        // Позиционный constraint: не выходить за длину верёвки
         Vector3 newToAnchor = _attachPoint - playerTransform.position;
-        if (newToAnchor.magnitude > _currentLength)
+        float newDist = newToAnchor.magnitude;
+        if (newDist > _ropeLength)
         {
-            Vector3 corrected = _attachPoint - newToAnchor.normalized * _currentLength;
-            Vector3 correction = corrected - playerTransform.position;
+            Vector3 correction = (_attachPoint - newToAnchor.normalized * _ropeLength) - playerTransform.position;
             characterController.Move(correction);
 
-            // Убираем радиальную компоненту после коррекции
+            // Гасим радиальную компоненту после коррекции
             Vector3 ropeDir = newToAnchor.normalized;
             float radial = Vector3.Dot(_swingVelocity, -ropeDir);
             if (radial > 0)
@@ -189,22 +209,26 @@ public class WhipController : MonoBehaviour
 
     private Vector3 GetSwingInput()
     {
-        if (playerTransform == null || PlayerMovement == null) return Vector3.zero;
+        if (PlayerMovement == null) return Vector3.zero;
 
         float h = PlayerMovement.MoveInput.x;
         float v = PlayerMovement.MoveInput.y;
 
-        // Направление относительно камеры, но только горизонталь
         Vector3 camForward = Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up).normalized;
         Vector3 camRight = Camera.main.transform.right;
 
-        return (camRight * h + camForward * v);
+        return camRight * h + camForward * v;
     }
 
     private void UpdateRetracting()
     {
         _currentLength = Mathf.MoveTowards(_currentLength, 0f, _retractSpeed * Time.deltaTime);
-        Vector3 currentTip = Vector3.Lerp(whipOrigin.position, _attachPoint, _currentLength / _ropeLength);
+
+        // Tip идёт от зафиксированной точки обратно к origin
+        float t = (_retractFromTip - whipOrigin.position).magnitude > 0.001f
+            ? _currentLength / (_retractFromTip - whipOrigin.position).magnitude
+            : 0f;
+        Vector3 currentTip = Vector3.Lerp(whipOrigin.position, _retractFromTip, t);
 
         _rope.Simulate(whipOrigin.position, currentTip, _gravity, _damping);
 
@@ -214,9 +238,9 @@ public class WhipController : MonoBehaviour
 
     private void UpdateRopeVisual()
     {
-        if (whipOrigin == null) return;
         if (_state == WhipState.Idle)
         {
+            // Верёвка висит вниз от руки
             _lineRenderer.positionCount = 2;
             _lineRenderer.SetPosition(0, whipOrigin.position);
             _lineRenderer.SetPosition(1, whipOrigin.position + Vector3.down * 0.4f);

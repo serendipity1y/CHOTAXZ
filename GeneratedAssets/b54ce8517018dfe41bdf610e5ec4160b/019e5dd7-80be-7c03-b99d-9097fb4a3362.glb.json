@@ -1,0 +1,23 @@
+{
+    "asset": "b54ce8517018dfe41bdf610e5ec4160b",
+    "fileName": "019e5dd7-80be-7c03-b99d-9097fb4a3362.glb",
+    "prompt": "3D model of a mechanical button cap, square plunger, matching the reference image.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "e8f89765889600b4783cf22f93fb7d95",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

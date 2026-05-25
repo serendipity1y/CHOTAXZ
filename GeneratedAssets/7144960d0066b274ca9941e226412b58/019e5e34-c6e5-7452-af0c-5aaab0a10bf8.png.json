@@ -1,0 +1,28 @@
+{
+    "asset": "7144960d0066b274ca9941e226412b58",
+    "fileName": "019e5e34-c6e5-7452-af0c-5aaab0a10bf8.png",
+    "prompt": "3D modular game-ready floor tile, 2x2 meters, ancient temple flagstone, weathered grey-tan stone, deep cracks where banyan tree roots have pushed through, patches of damp moss in the seams, occasional broken corner, painterly stylized PBR, top-down view, solid white background.",
+    "negativePrompt": "",
+    "model": "gpt-image-1",
+    "modelName": "GPT Image 1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

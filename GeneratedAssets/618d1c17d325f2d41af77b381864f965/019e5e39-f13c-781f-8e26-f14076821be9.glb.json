@@ -1,0 +1,23 @@
+{
+    "asset": "618d1c17d325f2d41af77b381864f965",
+    "fileName": "019e5e39-f13c-781f-8e26-f14076821be9.glb",
+    "prompt": "3D modular game-ready wall tile, 2m wide x 3m tall, ancient old-Chinese temple stone wall, weathered grey sandstone block, carved low-relief dragon-and-cloud motif on the inner face, deep cracks running diagonally, patches of moss along the base, thick jungle vines creeping from the bottom-left corner, lacquer paint flaking off in cinnabar-red patches, painterly stylized PBR.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "42fffe49628627045aeac4bc8f14d53f",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

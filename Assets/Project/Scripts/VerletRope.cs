@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class VerletRope 
+public class VerletRope
 {
     public struct Node
     {
@@ -10,15 +10,13 @@ public class VerletRope
     }
 
     private Node[] _nodes;
-
     private int _segmentCount;
-
     private float _segmentLength;
 
-    public VerletRope(int segments, float totalLegnth)
+    public VerletRope(int segments, float totalLength)
     {
         _segmentCount = segments;
-        _segmentLength = totalLegnth / segments;
+        _segmentLength = totalLength / segments;
         _nodes = new Node[segments + 1];
     }
 
@@ -32,6 +30,7 @@ public class VerletRope
             _nodes[i].locked = false;
         }
     }
+
     public void Simulate(Vector3 startPoint, Vector3? endPoint, float gravity, float damping)
     {
         // Verlet integration
@@ -44,7 +43,7 @@ public class VerletRope
             _nodes[i].position += velocity + Vector3.down * gravity * Time.deltaTime * Time.deltaTime;
         }
 
-        // Constraints: якорь начала и конца
+        // Anchors
         _nodes[0].position = startPoint;
         _nodes[0].locked = true;
 
@@ -53,8 +52,12 @@ public class VerletRope
             _nodes[_segmentCount].position = endPoint.Value;
             _nodes[_segmentCount].locked = true;
         }
+        else
+        {
+            _nodes[_segmentCount].locked = false;
+        }
 
-        // Constraint длины сегментов (несколько итераций для стабильности)
+        // Segment length constraints
         for (int iteration = 0; iteration < 10; iteration++)
         {
             for (int i = 0; i < _segmentCount; i++)
@@ -76,19 +79,4 @@ public class VerletRope
 
     public Vector3 GetNodePosition(int index) => _nodes[index].position;
     public int NodeCount => _segmentCount + 1;
-    
-    
-    
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

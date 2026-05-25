@@ -1,0 +1,23 @@
+{
+    "asset": "6ea0b8aa7ca9e2c46af130ee1beb55f8",
+    "fileName": "019e5de1-e1b1-7d00-a878-e95e66ab3c37.fbx",
+    "prompt": "generate textures for middle poly model of mango ",
+    "negativePrompt": "",
+    "model": "model3d-tripo3-texturing",
+    "modelName": "Tripo 3.0 Texturing",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Texturing",
+    "promptImageReferenceGuid": "c9c6ddaaab0baf64fbc89a4550b9ae20",
+    "modelReferenceGuid": "6ea0b8aa7ca9e2c46af130ee1beb55f8",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

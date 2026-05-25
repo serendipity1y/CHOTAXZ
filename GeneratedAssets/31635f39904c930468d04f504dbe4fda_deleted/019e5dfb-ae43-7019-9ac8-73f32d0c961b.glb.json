@@ -1,0 +1,23 @@
+{
+    "asset": "31635f39904c930468d04f504dbe4fda",
+    "fileName": "019e5dfb-ae43-7019-9ac8-73f32d0c961b.glb",
+    "prompt": "3D model of a modern transport helicopter, based on the reference image. High detail, PBR materials.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "78125a4f1735a424892d04df69eb9d27",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

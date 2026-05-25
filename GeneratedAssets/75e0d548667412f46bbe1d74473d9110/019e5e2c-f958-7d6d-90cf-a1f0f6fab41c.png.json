@@ -1,0 +1,28 @@
+{
+    "asset": "75e0d548667412f46bbe1d74473d9110",
+    "fileName": "019e5e2c-f958-7d6d-90cf-a1f0f6fab41c.png",
+    "prompt": "3D modular game-ready wall tile, 2m wide x 3m tall, ancient old-Chinese temple stone wall, weathered grey sandstone block, carved low-relief dragon-and-cloud motif on the inner face, deep cracks running diagonally, patches of moss along the base, thick jungle vines creeping from the bottom-left corner, lacquer paint flaking off in cinnabar-red patches, painterly stylized PBR, neutral lighting, dark background, presented straight-on for reference.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

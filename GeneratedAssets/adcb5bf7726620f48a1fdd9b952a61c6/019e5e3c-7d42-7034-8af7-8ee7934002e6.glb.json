@@ -1,0 +1,23 @@
+{
+    "asset": "adcb5bf7726620f48a1fdd9b952a61c6",
+    "fileName": "019e5e3c-7d42-7034-8af7-8ee7934002e6.glb",
+    "prompt": "3D game-ready foliage asset, jungle wall-creeping ivy patches overgrowing ancient stone, muted twilight greens, realistic-stylized PBR.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "f9f146a2251e61d44b3c205a5a8d2115",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

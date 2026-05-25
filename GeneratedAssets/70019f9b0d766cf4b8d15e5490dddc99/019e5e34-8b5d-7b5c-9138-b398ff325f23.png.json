@@ -1,0 +1,28 @@
+{
+    "asset": "70019f9b0d766cf4b8d15e5490dddc99",
+    "fileName": "019e5e34-8b5d-7b5c-9138-b398ff325f23.png",
+    "prompt": "3D ancient temple stone column, carved with coiled-dragon spiral relief from base to capital, fluted shaft, lotus-petal base, weathered grey sandstone, painted cinnabar lacquer mostly flaked away exposing stone, thick jungle vines spiralling up the shaft, moss collar at the base, top broken off jagged, ~5m tall, painterly stylized PBR, solid white background.",
+    "negativePrompt": "",
+    "model": "gpt-image-1",
+    "modelName": "GPT Image 1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

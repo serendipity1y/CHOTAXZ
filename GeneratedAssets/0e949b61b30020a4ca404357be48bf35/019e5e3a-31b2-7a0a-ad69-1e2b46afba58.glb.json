@@ -1,0 +1,23 @@
+{
+    "asset": "0e949b61b30020a4ca404357be48bf35",
+    "fileName": "019e5e3a-31b2-7a0a-ad69-1e2b46afba58.glb",
+    "prompt": "3D ancient old-Chinese temple archway, stepped stone gate with upturned tiled eaves, dragon-head corner ornaments, weathered grey stone, peeling red lacquer, brass nail studs gone green with verdigris, thick jungle vines hanging from the top, moss along the base, cracked keystone, ~4m wide x 5m tall, painterly stylized PBR.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "10e2679907450854e8a9bdfcbab89a30",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

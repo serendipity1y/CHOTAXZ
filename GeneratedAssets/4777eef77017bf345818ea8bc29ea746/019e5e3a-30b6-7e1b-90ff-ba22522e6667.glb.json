@@ -1,0 +1,23 @@
+{
+    "asset": "4777eef77017bf345818ea8bc29ea746",
+    "fileName": "019e5e3a-30b6-7e1b-90ff-ba22522e6667.glb",
+    "prompt": "3D modular game-ready floor tile, 2x2 meters, ancient temple flagstone, weathered grey-tan stone, deep cracks where banyan tree roots have pushed through, patches of damp moss in the seams, occasional broken corner, painterly stylized PBR.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "7144960d0066b274ca9941e226412b58",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

@@ -1,16 +1,19 @@
 using UnityEngine;
 
-// WhipPickup — остаётся как есть
-// WhipPickup
 public class WhipPickup : MonoBehaviour
 {
+    [SerializeField] private GameObject whipPrefab;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             PlayerWhip playerWhip = other.GetComponent<PlayerWhip>();
-            playerWhip.EquipWhip(null);
-            Destroy(gameObject);
+            if (playerWhip != null && whipPrefab != null)
+            {
+                playerWhip.EquipWhip(PlayerWhip.WhipSlot.Secondary, whipPrefab);
+                Destroy(gameObject);
+            }
         }
     }
 }

@@ -52,6 +52,11 @@ public class TestINteract : MonoBehaviour, IStateInteractable
         {
         
         }
+
+        public void Udali()
+        {
+            Destroy(gameObject);
+        }
     }
 }
 

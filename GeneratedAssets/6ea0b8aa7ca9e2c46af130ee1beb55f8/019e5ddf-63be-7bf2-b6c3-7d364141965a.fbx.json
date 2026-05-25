@@ -1,0 +1,23 @@
+{
+    "asset": "6ea0b8aa7ca9e2c46af130ee1beb55f8",
+    "fileName": "019e5ddf-63be-7bf2-b6c3-7d364141965a.fbx",
+    "prompt": "generate middle polu model of a mango ",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "c9c6ddaaab0baf64fbc89a4550b9ae20",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": 20000
+}

@@ -1,0 +1,28 @@
+{
+    "asset": "0d2569fb302e06c4991df0b10d793d53",
+    "fileName": "019e5dd4-b862-7018-8a4c-7e6e0b6711cf.png",
+    "prompt": "A top-down view of a square mechanical button base, a grey metallic frame with a square hole in the middle, industrial sci-fi style, clean white background.",
+    "negativePrompt": "",
+    "model": "gemini-3.1-flash",
+    "modelName": "Gemini 3.1 Nano Banana 2",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}
