@@ -1,0 +1,23 @@
+{
+    "asset": "e5b3ee4baa9e4894c8875116d207e48e",
+    "fileName": "019e647d-74b1-7602-beec-1d6660bcd837.glb",
+    "prompt": "3D ancient temple iron lattice gate, dark wrought-iron vertical bars with a brass center medallion shaped like a coin with a square hole, mossy stone arch around it, vines threading through the bars, weathered and rusted, neutral non-glowing material, painterly stylized PBR, three-quarter angle, dark neutral background.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "b9d5707378344d44a8fbcd7b6c50cc57",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}

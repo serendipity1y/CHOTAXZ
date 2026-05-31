@@ -1,0 +1,28 @@
+{
+    "asset": "551219346d380eb4c9bcc6b2385bf7f7",
+    "fileName": "019e647a-10ab-7141-9eee-057bab8db78e.png",
+    "prompt": "3D ancient temple door, vertical slab of thick dark wood lacquered cinnabar red, reinforced with iron crossbands and large brass nail studs, glowing ember-orange cracks running along its seams as if pressure builds behind it, ornate ring handle in tarnished brass, set inside a stone archway with vines hanging from above, faint smoke leaking from the cracks, painterly stylized PBR, three-quarter angle, isolated on neutral background.",
+    "negativePrompt": "",
+    "model": "gemini-3.0-pro",
+    "modelName": "Gemini 3.0 Pro",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

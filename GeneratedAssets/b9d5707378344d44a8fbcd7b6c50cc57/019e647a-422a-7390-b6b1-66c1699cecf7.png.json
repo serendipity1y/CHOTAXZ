@@ -1,0 +1,28 @@
+{
+    "asset": "b9d5707378344d44a8fbcd7b6c50cc57",
+    "fileName": "019e647a-422a-7390-b6b1-66c1699cecf7.png",
+    "prompt": "3D ancient temple iron lattice gate, dark wrought-iron vertical bars with a brass center medallion shaped like a coin with a square hole, mossy stone arch around it, vines threading through the bars, weathered and rusted, neutral non-glowing material, painterly stylized PBR, three-quarter angle, dark neutral background, isolated on neutral background.",
+    "negativePrompt": "",
+    "model": "gemini-3.0-pro",
+    "modelName": "Gemini 3.0 Pro",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

@@ -1,0 +1,28 @@
+{
+    "asset": "709e904e84e634744a60463fb8c4a46d",
+    "fileName": "019e79b8-6e6b-7426-9f46-3cfe1cc70a09.png",
+    "prompt": "Stylized 3D modular wall tile for a game, 2m wide × 3m tall. Ancient jungle temple architecture, East Asian influences, massive sandstone blocks, stepped forms, deep recessed sections, decorative stone frames. Weathered texture, cracks, chipped corners, moss, creeping vines. Chunky proportions, clean bevels, hand-painted PBR look. Protruding stone supports, recessed panels. Isolated on a neutral dark background, orthographic front view, studio lighting.",
+    "negativePrompt": "",
+    "model": "gpt-image-1",
+    "modelName": "GPT Image 1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelatePixelGridSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0,
+    "dimensions": {
+        "width": 1024,
+        "height": 1024
+    },
+    "spriteSheet": false,
+    "duration": 0.0
+}

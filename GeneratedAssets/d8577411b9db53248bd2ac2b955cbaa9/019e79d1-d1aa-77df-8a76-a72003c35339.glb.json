@@ -1,0 +1,23 @@
+{
+    "asset": "d8577411b9db53248bd2ac2b955cbaa9",
+    "fileName": "019e79d1-d1aa-77df-8a76-a72003c35339.glb",
+    "prompt": "3D modular game-ready wall tile, 2m wide x 3m tall. Ancient jungle temple architecture with East Asian influences. Massive stone construction, layered blocks, stepped forms, deep recessed sections, decorative frames. Weathered sandstone and granite, cracked, chipped, moss, vines. Stylized art, chunky proportions, readable silhouette, hand-painted PBR textures. Fully 360-degree detailed asset, matching front details on the back and sides, thick structural elements. Isolated asset on transparent background.",
+    "negativePrompt": "",
+    "model": "model3d-tripo-p1",
+    "modelName": "Tripo P1",
+    "customSeed": -1,
+    "w3CTraceId": "",
+    "feedback": 0,
+    "refinementMode": "Generation",
+    "promptImageReferenceGuid": "709e904e84e634744a60463fb8c4a46d",
+    "modelReferenceGuid": "",
+    "multiviewFrontGuid": "",
+    "multiviewBackGuid": "",
+    "multiviewLeftGuid": "",
+    "multiviewRightGuid": "",
+    "multiviewTopGuid": "",
+    "multiviewBottomGuid": "",
+    "multiviewLeftFrontGuid": "",
+    "multiviewRightFrontGuid": "",
+    "faceLimit": -1
+}
