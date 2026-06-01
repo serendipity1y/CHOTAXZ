@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class WhipController : MonoBehaviour
@@ -9,13 +10,23 @@ public class WhipController : MonoBehaviour
     [SerializeField] private float _damping = 0.98f;
 
     [Header("Whip Settings")]
-    [SerializeField] private float _throwSpeed = 22f;
     [SerializeField] private float _retractSpeed = 10f;
-    [SerializeField] private float _attachRadius = 0.35f;
     [SerializeField] private LayerMask _attachableLayers;
     [SerializeField] private LayerMask _interactableLayers;
 
-    [Header("Swing Settings")]
+    [Header("Swing Attack")]
+    [Tooltip("Seconds for the whip to travel the arc.")]
+    [SerializeField] private float _swingDuration = 0.35f;
+    [Tooltip("Arc angle at swing start (windup). Negative = up/back.")]
+    [SerializeField] private float _arcStartAngle = -80f;
+    [Tooltip("Arc angle at swing end (crack). Positive = down/front.")]
+    [SerializeField] private float _arcEndAngle = 35f;
+    [Tooltip("Thickness of the hit sweep along the arc.")]
+    [SerializeField] private float _sweepRadius = 0.4f;
+    [Tooltip("Eases the tip along the arc. Sharp ease-in = fast crack at end.")]
+    [SerializeField] private AnimationCurve _swingEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
+    [Header("Grapple Swing Settings")]
     [SerializeField] private float _swingForce = 8f;
 
     [Header("Visuals")]
@@ -34,10 +45,16 @@ public class WhipController : MonoBehaviour
 
     private Vector3 _attachPoint;
     private Vector3 _retractFromTip;
-    private Vector3 _throwDirection;
+    private Vector3 _currentTip;
     private float _currentLength;
     private bool _hasAttachTarget;
     private Vector3 _swingVelocity;
+
+    // Arc swing state
+    private float _swingTimer;
+    private Vector3 _planeForward;
+    private Vector3 _planeRight;
+    private readonly HashSet<Collider> _hitThisSwing = new HashSet<Collider>();
 
     // Намотка
     private AttachablePost _attachedPost;
@@ -46,7 +63,7 @@ public class WhipController : MonoBehaviour
     public bool IsAttached => _state == WhipState.Attached;
     public LayerMask AttachableLayers => _attachableLayers;
 
-    private enum WhipState { Idle, Throwing, Attached, Retracting }
+    private enum WhipState { Idle, Swinging, Attached, Retracting }
 
     private void Awake()
     {
@@ -72,78 +89,42 @@ public class WhipController : MonoBehaviour
     {
         if (_state != WhipState.Idle) return;
 
-        Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        float camToHandOffset = Vector3.Distance(ray.origin, whipOrigin.position);
-        float castDistance = _ropeLength + camToHandOffset;
+        // Snapshot the swing plane from camera facing (flattened to horizontal).
+        Vector3 camForward = Camera.main != null
+            ? Camera.main.transform.forward
+            : playerTransform.forward;
+        _planeForward = Vector3.ProjectOnPlane(camForward, Vector3.up).normalized;
+        if (_planeForward.sqrMagnitude < 0.0001f)
+            _planeForward = playerTransform.forward;
+        _planeRight = Vector3.Cross(Vector3.up, _planeForward).normalized;
 
-        LayerMask combinedMask = _attachableLayers | _interactableLayers;
+        _hasAttachTarget = false;
+        _attachedPost = null;
+        _effectiveLength = _ropeLength;
+        _hitThisSwing.Clear();
+        _swingTimer = 0f;
 
-        if (Physics.SphereCast(
-                ray.origin,         // ← от камеры, не от руки
-                _attachRadius,
-                ray.direction,
-                out RaycastHit hit,
-                castDistance,
-                combinedMask))
-        {
-            if (Vector3.Distance(whipOrigin.position, hit.point) <= _ropeLength)
-            {
-                _attachPoint = hit.point;
-
-                int hitLayer = 1 << hit.collider.gameObject.layer;
-                bool isAttachable   = (hitLayer & _attachableLayers.value)   != 0;
-                bool isInteractable = (hitLayer & _interactableLayers.value) != 0;
-
-                if (isInteractable)
-                    hit.collider.GetComponent<IWhipInteractable>()?.OnWhipHit();
-
-                _hasAttachTarget = isAttachable;
-
-                // Считаем намотку уже здесь — знаем дистанцию и радиус столба
-                if (isAttachable)
-                {
-                    _attachedPost = hit.collider.GetComponent<AttachablePost>();
-                    if (_attachedPost != null)
-                    {
-                        float wrapFactor = 1f - Mathf.Clamp01(hit.distance / _ropeLength);
-                        float wrappedLength = _attachedPost.Radius * Mathf.PI * 2f * wrapFactor;
-                        _effectiveLength = Mathf.Max(0.5f, _ropeLength - wrappedLength);
-                    }
-                    else
-                    {
-                        _effectiveLength = _ropeLength;
-                    }
-                } 
-            }
-            else
-            {
-                _attachPoint = ray.origin + ray.direction * castDistance;
-                _hasAttachTarget = false;
-                _effectiveLength = _ropeLength;
-            }
-        }
-        else
-        {
-            _attachPoint = ray.origin + ray.direction * castDistance;
-            _hasAttachTarget = false;
-            _effectiveLength = _ropeLength;
-        }
-        _throwDirection = (_attachPoint - whipOrigin.position).normalized;
-        
-        _rope.Initialize(whipOrigin.position, whipOrigin.position + _throwDirection * 0.1f);
-        _currentLength = 0f;
-        _state = WhipState.Throwing;
+        _currentTip = whipOrigin.position + ArcDirection(_arcStartAngle) * _ropeLength;
+        _rope.Initialize(whipOrigin.position, _currentTip);
+        _state = WhipState.Swinging;
 
         if (_animator != null)
             _animator.enabled = false;
     }
 
+    /// <summary>Direction in the swing plane at the given arc angle (deg). Negative = up.</summary>
+    private Vector3 ArcDirection(float angle) =>
+        Quaternion.AngleAxis(angle, _planeRight) * _planeForward;
+
     public void Retract()
     {
         if (_state == WhipState.Idle) return;
 
-        if (_state == WhipState.Throwing)
-            _retractFromTip = whipOrigin.position + _throwDirection * _currentLength;
+        if (_state == WhipState.Swinging)
+        {
+            _retractFromTip = _currentTip;
+            _currentLength = (_currentTip - whipOrigin.position).magnitude;
+        }
         else if (_state == WhipState.Attached)
             _retractFromTip = _attachPoint;
 
@@ -165,36 +146,86 @@ public class WhipController : MonoBehaviour
     {
         switch (_state)
         {
-            case WhipState.Throwing:   UpdateThrowing();   break;
+            case WhipState.Swinging:   UpdateSwinging();   break;
             case WhipState.Attached:   UpdateSwing();      break;
             case WhipState.Retracting: UpdateRetracting(); break;
         }
     }
 
-    private void UpdateThrowing()
+    private void UpdateSwinging()
     {
-        float targetLength = Vector3.Distance(whipOrigin.position, _attachPoint);
-        _currentLength = Mathf.MoveTowards(_currentLength, targetLength, _throwSpeed * Time.deltaTime);
+        _swingTimer += Time.deltaTime;
+        float p = _swingDuration > 0f ? Mathf.Clamp01(_swingTimer / _swingDuration) : 1f;
+        float eased = _swingEase != null ? _swingEase.Evaluate(p) : p;
+        float angle = Mathf.Lerp(_arcStartAngle, _arcEndAngle, eased);
 
-        Vector3 currentTip = whipOrigin.position + _throwDirection * _currentLength;
-        _rope.Simulate(whipOrigin.position, currentTip, _gravity * 0.2f, _damping);
+        Vector3 prevTip = _currentTip;
+        _currentTip = whipOrigin.position + ArcDirection(angle) * _ropeLength;
 
-        if (_currentLength >= targetLength - 0.05f)
+        // Hit everything the whip sweeps across this frame.
+        SweepHits(prevTip, _currentTip);
+        if (_state != WhipState.Swinging) return; // grappled mid-swing
+
+        _rope.Simulate(whipOrigin.position, _currentTip, _gravity * 0.2f, _damping);
+
+        if (p >= 1f)
         {
-            if (_hasAttachTarget)
+            _retractFromTip = _currentTip;
+            _currentLength = (_currentTip - whipOrigin.position).magnitude;
+            _state = WhipState.Retracting;
+        }
+    }
+
+    /// <summary>Capsule-sweep between two tip positions; fire interactables, grapple first attachable.</summary>
+    private void SweepHits(Vector3 from, Vector3 to)
+    {
+        LayerMask combinedMask = _attachableLayers | _interactableLayers;
+        Collider[] hits = Physics.OverlapCapsule(from, to, _sweepRadius, combinedMask,
+                                                 QueryTriggerInteraction.Ignore);
+
+        foreach (Collider col in hits)
+        {
+            if (_hitThisSwing.Contains(col)) continue;
+
+            int layerBit = 1 << col.gameObject.layer;
+            bool isInteractable = (layerBit & _interactableLayers.value) != 0;
+            bool isAttachable   = (layerBit & _attachableLayers.value)   != 0;
+
+            if (isInteractable)
             {
-                _retractFromTip = _attachPoint;
-                _state = WhipState.Attached;
-                _swingVelocity = characterController != null
-                    ? characterController.velocity
-                    : Vector3.zero;
+                col.GetComponent<IWhipInteractable>()?.OnWhipHit();
+                _hitThisSwing.Add(col);
             }
-            else
+
+            if (isAttachable)
             {
-                _retractFromTip = currentTip;
-                _state = WhipState.Retracting;
+                AttachTo(col, to);
+                return; // attaching ends the swing
             }
         }
+    }
+
+    private void AttachTo(Collider col, Vector3 tip)
+    {
+        _attachedPost = col.GetComponent<AttachablePost>();
+        if (_attachedPost != null)
+        {
+            _attachPoint = _attachedPost.GetClosestPoint(tip);
+            float dist = Vector3.Distance(whipOrigin.position, _attachPoint);
+            float wrapFactor = 1f - Mathf.Clamp01(dist / _ropeLength);
+            float wrappedLength = _attachedPost.Radius * Mathf.PI * 2f * wrapFactor;
+            _effectiveLength = Mathf.Max(0.5f, _ropeLength - wrappedLength);
+        }
+        else
+        {
+            _attachPoint = col.ClosestPoint(tip);
+            _effectiveLength = _ropeLength;
+        }
+
+        _hasAttachTarget = true;
+        _retractFromTip = _attachPoint;
+        _swingVelocity = characterController != null ? characterController.velocity : Vector3.zero;
+        _state = WhipState.Attached;
     }
 
     public void SetBones(Transform[] bones)
@@ -286,6 +317,9 @@ public class WhipController : MonoBehaviour
 
             int nodeIndex = Mathf.RoundToInt((float)i / (boneCount - 1) * (nodeCount - 1));
             _whipBones[i].position = _rope.GetNodePosition(nodeIndex);
+
+            // bone_0 is the handle root — drive its position only, keep handle orientation.
+            if (i == 0) continue;
 
             if (i < boneCount - 1)
             {
