@@ -8,4 +8,11 @@ namespace Player
         Yin,
         Yang
     }
+
+    public enum ControlState
+    {
+        GamePlay,
+        Cutscene,
+        Dead
+    }
 }

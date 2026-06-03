@@ -78,6 +78,7 @@ namespace Player
 
             _isDead = true;
             _currentHealth = 0;
+            
             OnDeath?.Invoke();
         }
 

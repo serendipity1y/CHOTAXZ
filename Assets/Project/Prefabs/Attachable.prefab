@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5560176485321927189}
   - component: {fileID: 6279232638609476021}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Attachable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59,7 +59,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3571264436197307532}
   - component: {fileID: 973575660626340109}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
