@@ -58,7 +58,7 @@ public class VerletRope
         }
 
         // Segment length constraints
-        for (int iteration = 0; iteration < 10; iteration++)
+        for (int iteration = 0; iteration < 20; iteration++)
         {
             for (int i = 0; i < _segmentCount; i++)
             {

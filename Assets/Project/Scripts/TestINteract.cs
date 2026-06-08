@@ -17,21 +17,19 @@ public class TestINteract : MonoBehaviour, IStateInteractable
     
         private void Awake() 
         {
-            Meshrenderer = GetComponent<Renderer>();
-            if(Meshrenderer != null) _originalColor = Meshrenderer.material.color;
         }
 
         public void Interact(PlayerState currentState)
         {
             if (currentState == PlayerState.Yin)
             {
-                Meshrenderer.material.color = Color.blue;
+                
                 Debug.Log("Объек синий?");
                 OnYinInteract();
             }
             else
             {
-                Meshrenderer.material.color = _originalColor;
+                
                 OnYangInteract();
                 Debug.Log("Объект вернул изначальный цвет");
             }

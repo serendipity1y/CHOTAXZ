@@ -4,7 +4,7 @@ using UnityEngine;
 public class WhipController : MonoBehaviour
 {
     [Header("Rope Settings")]
-    [SerializeField] private int _segments = 12;
+    [SerializeField] private int _segments = 20;
     [SerializeField] private float _ropeLength = 6f;
     [SerializeField] private float _gravity = 8f;
     [SerializeField] private float _damping = 0.98f;
@@ -16,15 +16,18 @@ public class WhipController : MonoBehaviour
 
     [Header("Swing Attack")]
     [Tooltip("Seconds for the whip to travel the arc.")]
-    [SerializeField] private float _swingDuration = 0.35f;
+    [SerializeField] private float _swingDuration = 0.4f;
     [Tooltip("Arc angle at swing start (windup). Negative = up/back.")]
-    [SerializeField] private float _arcStartAngle = -80f;
+    [SerializeField] private float _arcStartAngle = -70f;
     [Tooltip("Arc angle at swing end (crack). Positive = down/front.")]
-    [SerializeField] private float _arcEndAngle = 35f;
+    [SerializeField] private float _arcEndAngle = 10f;
     [Tooltip("Thickness of the hit sweep along the arc.")]
     [SerializeField] private float _sweepRadius = 0.4f;
-    [Tooltip("Eases the tip along the arc. Sharp ease-in = fast crack at end.")]
-    [SerializeField] private AnimationCurve _swingEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [Tooltip("Eases the tip along the arc. Slow windup then fast crack.")]
+    [SerializeField] private AnimationCurve _swingEase = new AnimationCurve(
+        new Keyframe(0f, 0f, 0f, 0.3f),
+        new Keyframe(0.6f, 0.1f, 0.8f, 4f),
+        new Keyframe(1f, 1f, 6f, 0f));
 
     [Header("Grapple Swing Settings")]
     [SerializeField] private float _swingForce = 8f;
@@ -203,6 +206,21 @@ public class WhipController : MonoBehaviour
                 return; // attaching ends the swing
             }
         }
+
+        // Camera-aim raycast — compensates for hand-vs-camera position offset
+        if (Camera.main != null && _interactableLayers.value != 0)
+        {
+            Ray camRay = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
+            if (Physics.Raycast(camRay, out RaycastHit camHit, _ropeLength * 1.2f,
+                                _interactableLayers, QueryTriggerInteraction.Ignore))
+            {
+                if (!_hitThisSwing.Contains(camHit.collider))
+                {
+                    camHit.collider.GetComponent<IWhipInteractable>()?.OnWhipHit();
+                    _hitThisSwing.Add(camHit.collider);
+                }
+            }
+        }
     }
 
     private void AttachTo(Collider col, Vector3 tip)
@@ -237,19 +255,7 @@ public class WhipController : MonoBehaviour
     {
         if (characterController == null) return;
 
-        Vector3 toAnchor = _attachPoint - playerTransform.position;
-        float ropeDistance = toAnchor.magnitude;
-
         _swingVelocity += Physics.gravity * Time.deltaTime;
-
-        // Убираем компоненту velocity, удлиняющую верёвку
-        if (ropeDistance > 0.01f)
-        {
-            Vector3 ropeDir = toAnchor.normalized;
-            float radialVelocity = Vector3.Dot(_swingVelocity, ropeDir);
-            if (radialVelocity < 0)
-                _swingVelocity -= ropeDir * radialVelocity;
-        }
 
         _swingVelocity += GetSwingInput() * _swingForce * Time.deltaTime;
 
@@ -315,20 +321,33 @@ public class WhipController : MonoBehaviour
         {
             if (_whipBones[i] == null) continue;
 
-            int nodeIndex = Mathf.RoundToInt((float)i / (boneCount - 1) * (nodeCount - 1));
-            _whipBones[i].position = _rope.GetNodePosition(nodeIndex);
-
-            // bone_0 is the handle root — drive its position only, keep handle orientation.
-            if (i == 0) continue;
+            float t = boneCount > 1 ? (float)i / (boneCount - 1) : 0f;
+            Vector3 pos = SampleRope(t, nodeCount);
+            _whipBones[i].position = pos;
 
             if (i < boneCount - 1)
             {
-                int nextNodeIndex = Mathf.RoundToInt((float)(i + 1) / (boneCount - 1) * (nodeCount - 1));
-                Vector3 dir = _rope.GetNodePosition(nextNodeIndex) - _whipBones[i].position;
+                float tNext = (float)(i + 1) / (boneCount - 1);
+                Vector3 nextPos = SampleRope(tNext, nodeCount);
+                Vector3 dir = nextPos - pos;
                 if (dir.sqrMagnitude > 0.0001f)
-                    _whipBones[i].rotation = Quaternion.LookRotation(dir);
+                {
+                    Quaternion lookRot = Quaternion.LookRotation(dir);
+                    _whipBones[i].rotation = i == 0
+                        ? Quaternion.Slerp(whipOrigin.rotation, lookRot, 0.35f)
+                        : lookRot;
+                }
             }
         }
+    }
+
+    private Vector3 SampleRope(float t, int nodeCount)
+    {
+        float nodeFloat = t * (nodeCount - 1);
+        int nodeA = Mathf.FloorToInt(nodeFloat);
+        int nodeB = Mathf.Min(nodeA + 1, nodeCount - 1);
+        float lerpT = nodeFloat - nodeA;
+        return Vector3.Lerp(_rope.GetNodePosition(nodeA), _rope.GetNodePosition(nodeB), lerpT);
     }
 
     private Vector3 GetSwingInput()
