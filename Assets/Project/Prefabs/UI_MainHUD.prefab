@@ -393,7 +393,6 @@ GameObject:
   - component: {fileID: 3662003885602331443}
   - component: {fileID: 4640263737392535819}
   - component: {fileID: 1292868728719955084}
-  - component: {fileID: 2928400313527607375}
   m_Layer: 5
   m_Name: UI_MainHUD
   m_TagString: Untagged
@@ -488,28 +487,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &2928400313527607375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1837704799037366970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23e6751386021944cb114311adb4ffad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Player.GameUIVisuals
-  stateSystem: {fileID: 0}
-  peakSystem: {fileID: 0}
-  peakSlider: {fileID: 8822844582809042574}
-  peakFillImage: {fileID: 6245049406377290207}
-  healthSlider: {fileID: 9086138676739570551}
-  healthFillImage: {fileID: 7729857876402412349}
-  stateText: {fileID: 8910665838456226788}
-  yinColor: {r: 0.2, g: 0.4, b: 1, a: 1}
-  yangColor: {r: 1, g: 0.6, b: 0.2, a: 1}
-  healthColor: {r: 0.8, g: 0.2, b: 0.2, a: 1}
 --- !u!1 &2001973203274312276
 GameObject:
   m_ObjectHideFlags: 0

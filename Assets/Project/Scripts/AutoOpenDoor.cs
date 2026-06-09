@@ -4,7 +4,7 @@ public class DoorAuto : MonoBehaviour
 {
     public HingeJoint hinge;
     public float openSpeed = 200f;
-    private bool canOpen;
+    public bool canOpen;
 
     private JointMotor motor;
 
@@ -13,6 +13,8 @@ public class DoorAuto : MonoBehaviour
         motor = hinge.motor;
         motor.force = 100;
     }
+    
+    
 
     public void Open()
     {

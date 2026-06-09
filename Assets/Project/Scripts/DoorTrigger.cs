@@ -9,20 +9,23 @@ public class DoorTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Collided atleast");
+        Debug.Log("Collided atleast" + other);
         if (other.CompareTag("Player"))
             door.Open();
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log("Collided atleast");
+        Debug.Log("Collided atleast"+ other);
         if (other.CompareTag("Player"))
+            Debug.Log("Colliede wit player");
             door.Close();
     }
 
     public void CanBeOpened()
     {
         boxCollide.enabled = true;
+        door.canOpen = true;
+        Debug.Log("Door Can be Opened");
     }
 }
