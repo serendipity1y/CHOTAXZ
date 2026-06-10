@@ -3,36 +3,42 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using TMPro;
 
 namespace MiniPuzzles
 {
     /// <summary>
-    /// ZIP path-tracing puzzle module. Self-contained. Shows only the start and end cells;
-    /// the player drags from start, across orthogonally adjacent cells, to build a path.
-    /// On pointer release the path is validated: it must start at start, end at end, and
-    /// visit every cell exactly once.
+    /// ZIP path-tracing puzzle (LinkedIn-style). Drag from 1, visit numbered dots in order
+    /// while filling every cell. Walls block crossing. Path shows direction arrows.
     /// </summary>
     public class ZipPuzzle : MonoBehaviour, IMiniPuzzle
     {
         private static readonly Color CellColor = new Color(0.20f, 0.22f, 0.30f);
-        private static readonly Color PathColor = new Color(0.30f, 0.55f, 0.95f);
-        private static readonly Color StartColor = new Color(0.25f, 0.80f, 0.40f);
-        private static readonly Color EndColor = new Color(0.90f, 0.35f, 0.35f);
+        private static readonly Color PathColor = new Color(0.28f, 0.52f, 0.92f);
+        private static readonly Color PathHeadColor = new Color(0.40f, 0.68f, 1.00f);
+        private static readonly Color WaypointPendingColor = new Color(0.92f, 0.82f, 0.22f);
+        private static readonly Color WaypointStartColor = new Color(0.22f, 0.78f, 0.42f);
+        private static readonly Color WaypointEndColor = new Color(0.88f, 0.32f, 0.32f);
+        private static readonly Color WaypointNextGlow = new Color(1.00f, 0.95f, 0.55f);
+        private static readonly Color WallColor = new Color(0.95f, 0.95f, 0.98f);
 
         private int _size;
-        private int _start;
-        private int _end;
+        private int _waypointCount;
+        private int[] _waypointAtCell;
+        private byte[] _wallMask;
         private Image[] _images;
+        private TextMeshProUGUI[] _labels;
+        private TextMeshProUGUI[] _arrows;
+        private Outline[] _labelOutlines;
         private readonly List<int> _path = new();
+        private int _nextWaypoint = 1;
         private bool _finished;
         private float _startTime;
         private PuzzleOverlay _overlay;
         private Action _onSolved;
 
-        /// <inheritdoc />
         public PuzzleType Type => PuzzleType.ZIP;
 
-        /// <inheritdoc />
         public void Begin(PuzzleContext context, PuzzleOverlay overlay, Action onSolved, Action onFailed)
         {
             _overlay = overlay;
@@ -42,65 +48,129 @@ namespace MiniPuzzles
 
             ZipLevelData data = ZipGenerator.Generate(context.difficulty, context.seed);
             _size = data.size;
-            _start = data.startIndex;
-            _end = data.endIndex;
+            _waypointCount = data.waypointCount;
+            _waypointAtCell = data.waypointAtCell;
+            _wallMask = data.wallMask;
 
             BuildGrid();
             ResetPath();
-            overlay.SetStatus("Tap or drag green -> red");
+            UpdateProgressStatus();
         }
 
         private void Update()
         {
             if (_finished) return;
-            _overlay.SetStatus($"Time: {Time.unscaledTime - _startTime:0.0}s");
+            float elapsed = Time.unscaledTime - _startTime;
+            string progress = _nextWaypoint <= _waypointCount
+                ? $"Next dot: {_nextWaypoint}  |  {elapsed:0.0}s"
+                : $"Fill remaining cells  |  {elapsed:0.0}s";
+            _overlay.SetStatus(progress);
         }
 
         private void BuildGrid()
         {
             var grid = PuzzleGrid.Create(transform as RectTransform, _size);
-            _images = new Image[_size * _size];
+            int cells = _size * _size;
+            _images = new Image[cells];
+            _labels = new TextMeshProUGUI[cells];
+            _arrows = new TextMeshProUGUI[cells];
+            _labelOutlines = new Outline[cells];
 
-            for (int i = 0; i < _size * _size; i++)
+            for (int i = 0; i < cells; i++)
             {
                 int index = i;
-                Image img = PuzzleGrid.CreateCell(grid, out Button button, out _);
+                Image img = PuzzleGrid.CreateCell(grid, out Button button, out TextMeshProUGUI label);
                 button.transition = Selectable.Transition.None;
                 _images[i] = img;
+                _labels[i] = label;
+                label.raycastTarget = false;
+
+                int waypoint = _waypointAtCell[i];
+                if (waypoint > 0)
+                {
+                    label.text = waypoint.ToString();
+                    label.fontStyle = FontStyles.Bold;
+                    label.fontSize = 26;
+                }
+
+                _arrows[i] = CreateArrowLabel(img.transform);
+                _labelOutlines[i] = label.gameObject.AddComponent<Outline>();
+                _labelOutlines[i].effectColor = new Color(1f, 0.9f, 0.2f, 0.9f);
+                _labelOutlines[i].effectDistance = new Vector2(2f, -2f);
+                _labelOutlines[i].enabled = false;
+                CreateWallBars(img.transform, i);
 
                 var pointer = img.gameObject.AddComponent<ZipCellPointer>();
                 pointer.Init(index, this);
             }
+
+            Repaint();
         }
 
-        // --- Pointer flow (called by ZipCellPointer) -------------------------------
-        // Hybrid input: tapping cells one-by-one and dragging both route through Extend,
-        // so the puzzle is playable even when drag pointer-enter events are not delivered.
+        private static TextMeshProUGUI CreateArrowLabel(Transform parent)
+        {
+            var go = new GameObject("Arrow", typeof(RectTransform), typeof(TextMeshProUGUI));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            tmp.alignment = TextAlignmentOptions.Bottom;
+            tmp.fontSize = 18;
+            tmp.color = new Color(1f, 1f, 1f, 0.75f);
+            tmp.raycastTarget = false;
+            tmp.margin = new Vector4(0f, 0f, 0f, 4f);
+            tmp.text = string.Empty;
+            return tmp;
+        }
+
+        private void CreateWallBars(Transform cell, int index)
+        {
+            CreateWallBar(cell, "WallUp", new Vector2(0.05f, 0.92f), new Vector2(0.95f, 1f), (_wallMask[index] & ZipGenerator.WallUp) != 0);
+            CreateWallBar(cell, "WallRight", new Vector2(0.92f, 0.05f), new Vector2(1f, 0.95f), (_wallMask[index] & ZipGenerator.WallRight) != 0);
+            CreateWallBar(cell, "WallDown", new Vector2(0.05f, 0f), new Vector2(0.95f, 0.08f), (_wallMask[index] & ZipGenerator.WallDown) != 0);
+            CreateWallBar(cell, "WallLeft", new Vector2(0f, 0.05f), new Vector2(0.08f, 0.95f), (_wallMask[index] & ZipGenerator.WallLeft) != 0);
+        }
+
+        private static void CreateWallBar(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, bool visible)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            var img = go.GetComponent<Image>();
+            img.color = WallColor;
+            img.raycastTarget = false;
+            go.SetActive(visible);
+        }
 
         internal void OnCellDown(int cell)
         {
             if (_finished) return;
 
-            if (_path.Count == 0)
+            if (_waypointAtCell[cell] == 1 && _path.Count > 0)
             {
-                if (cell == _start) // path must begin at the start cell
-                {
-                    _path.Add(cell);
-                    Repaint();
-                }
+                ResetPath();
                 return;
             }
 
-            if (cell == _start) // tapping start again restarts the trace
+            if (_path.Count == 0)
             {
-                ResetPath();
+                if (_waypointAtCell[cell] == 1)
+                    AddToPath(cell);
+                else
+                    _overlay.SetFeedback("Start on dot 1", true);
                 return;
             }
 
             Extend(cell);
         }
 
-        // Called on drag-over. 'pressed' is true only while the pointer button is held.
         internal void OnCellEnter(int cell, bool pressed)
         {
             if (_finished || !pressed || _path.Count == 0) return;
@@ -111,49 +181,166 @@ namespace MiniPuzzles
         {
             int last = _path[_path.Count - 1];
 
-            // Step back when targeting the previous cell (correct the path).
             if (_path.Count >= 2 && cell == _path[_path.Count - 2])
             {
                 _path.RemoveAt(_path.Count - 1);
+                RecomputeNextWaypoint();
                 Repaint();
+                UpdateProgressStatus();
                 return;
             }
 
-            if (_path.Contains(cell)) return;       // no revisits
-            if (!IsAdjacent(cell, last)) return;     // must be orthogonally adjacent
+            if (_path.Contains(cell)) return;
+            if (!IsAdjacent(cell, last)) return;
 
-            _path.Add(cell);
-            Repaint();
-
-            // Auto-validate: solved when every cell is visited and the path ends at end.
-            if (_path.Count == _size * _size && _path[_path.Count - 1] == _end)
+            if (ZipGenerator.HasWall(_wallMask, last, cell, _size))
             {
-                _finished = true;
-                _overlay.SetStatus("Solved");
-                _onSolved?.Invoke();
+                _overlay.SetFeedback("Wall blocks that move", true);
+                return;
+            }
+
+            int waypoint = _waypointAtCell[cell];
+            if (waypoint > 0 && waypoint != _nextWaypoint)
+            {
+                _overlay.SetFeedback($"Hit dot {_nextWaypoint} next (not {waypoint})", true);
+                return;
+            }
+
+            AddToPath(cell);
+        }
+
+        private void AddToPath(int cell)
+        {
+            int waypoint = _waypointAtCell[cell];
+            _path.Add(cell);
+
+            if (waypoint > 0)
+            {
+                _nextWaypoint = waypoint + 1;
+                if (waypoint < _waypointCount)
+                    _overlay.SetFeedback($"Dot {waypoint} reached — go to {waypoint + 1}", false);
+            }
+
+            Repaint();
+            UpdateProgressStatus();
+
+            if (_path.Count == _size * _size)
+            {
+                if (_nextWaypoint > _waypointCount)
+                {
+                    _finished = true;
+                    _overlay.SetFeedback("Solved!", false);
+                    _overlay.SetStatus("Solved");
+                    _onSolved?.Invoke();
+                }
+                else
+                {
+                    _overlay.SetFeedback($"Fill every cell — still need dot {_nextWaypoint}", true);
+                }
             }
         }
 
-        // --- Helpers ---------------------------------------------------------------
+        private void RecomputeNextWaypoint()
+        {
+            _nextWaypoint = 1;
+            foreach (int c in _path)
+            {
+                int w = _waypointAtCell[c];
+                if (w > 0 && w == _nextWaypoint) _nextWaypoint = w + 1;
+            }
+        }
+
+        private void UpdateProgressStatus()
+        {
+            if (_finished) return;
+            float elapsed = Time.unscaledTime - _startTime;
+            if (_path.Count == 0)
+                _overlay.SetStatus($"Start on dot 1  |  {elapsed:0.0}s");
+            else if (_nextWaypoint <= _waypointCount)
+                _overlay.SetStatus($"Next dot: {_nextWaypoint}  |  {elapsed:0.0}s");
+            else
+                _overlay.SetStatus($"Fill remaining cells  |  {elapsed:0.0}s");
+        }
 
         private void ResetPath()
         {
             _path.Clear();
+            _nextWaypoint = 1;
             Repaint();
+            UpdateProgressStatus();
+            _overlay.SetFeedback(string.Empty, false);
         }
 
         private void Repaint()
         {
-            for (int i = 0; i < _images.Length; i++) _images[i].color = CellColorFor(i);
-            foreach (int cell in _path)
-                if (cell != _start && cell != _end) _images[cell].color = PathColor;
+            for (int i = 0; i < _images.Length; i++)
+                PaintCell(i);
+
+            for (int p = 0; p < _path.Count - 1; p++)
+            {
+                int from = _path[p];
+                int to = _path[p + 1];
+                _arrows[from].text = DirectionGlyph(from, to);
+            }
+            if (_path.Count > 0)
+                _arrows[_path[_path.Count - 1]].text = string.Empty;
         }
 
-        private Color CellColorFor(int cell)
+        private void PaintCell(int i)
         {
-            if (cell == _start) return StartColor;
-            if (cell == _end) return EndColor;
-            return CellColor;
+            int w = _waypointAtCell[i];
+            int pathIndex = _path.IndexOf(i);
+            bool onPath = pathIndex >= 0;
+            bool isHead = onPath && pathIndex == _path.Count - 1;
+            bool completedWaypoint = w > 0 && w < _nextWaypoint;
+            bool isNextTarget = w == _nextWaypoint && !onPath;
+
+            _arrows[i].text = string.Empty;
+
+            _labelOutlines[i].enabled = isNextTarget;
+
+            if (onPath)
+            {
+                _images[i].color = isHead ? PathHeadColor : PathColor;
+                if (w > 0)
+                {
+                    _labels[i].color = Color.white;
+                    _labels[i].text = completedWaypoint ? $"{w} ✓" : w.ToString();
+                }
+                else
+                {
+                    _labels[i].color = new Color(1f, 1f, 1f, 0.5f);
+                    _labels[i].text = string.Empty;
+                }
+                return;
+            }
+
+            _labels[i].text = w > 0 ? w.ToString() : string.Empty;
+            _labels[i].color = Color.black;
+
+            if (w > 0)
+            {
+                _images[i].color = isNextTarget
+                    ? WaypointNextGlow
+                    : w == 1 ? WaypointStartColor
+                    : w == _waypointCount ? WaypointEndColor
+                    : WaypointPendingColor;
+            }
+            else
+            {
+                _images[i].color = CellColor;
+            }
+        }
+
+        private string DirectionGlyph(int from, int to)
+        {
+            int dr = to / _size - from / _size;
+            int dc = to % _size - from % _size;
+            if (dr < 0) return "▲";
+            if (dr > 0) return "▼";
+            if (dc > 0) return "▶";
+            if (dc < 0) return "◀";
+            return string.Empty;
         }
 
         private bool IsAdjacent(int a, int b)
@@ -164,16 +351,11 @@ namespace MiniPuzzles
         }
     }
 
-    /// <summary>
-    /// Per-cell pointer forwarder for <see cref="ZipPuzzle"/> drag tracing. Added at runtime.
-    /// </summary>
-    public class ZipCellPointer : MonoBehaviour,
-        IPointerDownHandler, IPointerEnterHandler
+    public class ZipCellPointer : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler
     {
         private int _cell;
         private ZipPuzzle _owner;
 
-        /// <summary>Binds this forwarder to its cell index and owning puzzle.</summary>
         public void Init(int cell, ZipPuzzle owner)
         {
             _cell = cell;
@@ -182,7 +364,6 @@ namespace MiniPuzzles
 
         public void OnPointerDown(PointerEventData eventData) => _owner.OnCellDown(_cell);
 
-        // pointerPress != null means a button is currently held (a drag is in progress).
         public void OnPointerEnter(PointerEventData eventData)
             => _owner.OnCellEnter(_cell, eventData.pointerPress != null);
     }

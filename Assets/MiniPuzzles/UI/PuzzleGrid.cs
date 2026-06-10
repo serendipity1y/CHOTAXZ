@@ -15,11 +15,16 @@ namespace MiniPuzzles
         /// Creates a stretched grid container with a <see cref="GridLayoutGroup"/> sized
         /// to fit <paramref name="size"/> x <paramref name="size"/> cells.
         /// </summary>
-        public static RectTransform Create(RectTransform parent, int size, float maxExtent = 520f)
+        public static RectTransform Create(RectTransform parent, int size, float maxExtent = 0f)
         {
-            // Normalize the puzzle root to fill its parent so the centered grid always
-            // lands correctly, regardless of how the prefab root rect was authored.
             StretchFill(parent);
+
+            if (maxExtent <= 0f)
+            {
+                float w = parent.rect.width > 0f ? parent.rect.width : 480f;
+                float h = parent.rect.height > 0f ? parent.rect.height : 480f;
+                maxExtent = Mathf.Min(w, h) * 0.95f;
+            }
 
             var go = new GameObject("Grid", typeof(RectTransform), typeof(GridLayoutGroup));
             var rt = (RectTransform)go.transform;
@@ -57,6 +62,16 @@ namespace MiniPuzzles
         }
 
         /// <summary>
+        /// Creates one interactive cell with an optional centered icon Image (for sprites).
+        /// </summary>
+        public static Image CreateIconCell(RectTransform grid, out Button button, out Image icon)
+        {
+            Image img = CreateCell(grid, out button, out _);
+            icon = CreateChildIcon(img.transform);
+            return img;
+        }
+
+        /// <summary>
         /// Creates one interactive cell (Image + Button + centered Text) under the grid.
         /// </summary>
         public static Image CreateCell(RectTransform grid, out Button button, out TextMeshProUGUI label)
@@ -90,6 +105,23 @@ namespace MiniPuzzles
             label.raycastTarget = false;
 
             return img;
+        }
+
+        private static Image CreateChildIcon(Transform parent)
+        {
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            var rt = (RectTransform)iconGo.transform;
+            rt.SetParent(parent, false);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(8f, 8f);
+            rt.offsetMax = new Vector2(-8f, -8f);
+
+            var icon = iconGo.GetComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            icon.enabled = false;
+            return icon;
         }
     }
 }

@@ -3336,7 +3336,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c3566bfbbed8ee44a623abe5ec08533, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiniPuzzles.PuzzleDoor
-  difficulty: 1
+  difficulty: 2
   contextLabel: Hack the lock
   seed: 0
   onPuzzleSolved:
@@ -4344,15 +4344,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
       propertyPath: onYinInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
@@ -4360,15 +4352,7 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 764180596}
     - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 764180596}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
       propertyPath: onYinInteract.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
@@ -4376,23 +4360,11 @@ PrefabInstance:
       value: OnPlayerInteract
       objectReference: {fileID: 0}
     - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnPlayerInteract
-      objectReference: {fileID: 0}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
       propertyPath: onYinInteract.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: MiniPuzzles.PuzzleDoor, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: MiniPuzzles.PuzzleDoor, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
       propertyPath: onYinInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
-      objectReference: {fileID: 0}
-    - target: {fileID: 6449485057276698869, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
-      propertyPath: onYangInteract.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 8907402688869307128, guid: 39196e75d2cd6c743b071a0856e71130, type: 3}
@@ -7268,14 +7240,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1730098409268869944, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_Alpha
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3196424074550444868, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_BlockingObjects
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3290013967189126618, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -7295,10 +7259,6 @@ PrefabInstance:
     - target: {fileID: 4057575476597539975, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
       propertyPath: m_Name
       value: PuzzleOverlay
-      objectReference: {fileID: 0}
-    - target: {fileID: 4057575476597539975, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4099491458849790303, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
       propertyPath: m_AnchorMax.y
@@ -7387,22 +7347,6 @@ PrefabInstance:
     - target: {fileID: 7485319940958246146, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7947631441171447467, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_SortingOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9043923390126186521, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_Color.b
-      value: 0.6132076
-      objectReference: {fileID: 0}
-    - target: {fileID: 9043923390126186521, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_Color.g
-      value: 0.6132076
-      objectReference: {fileID: 0}
-    - target: {fileID: 9043923390126186521, guid: b526962b7ca80284b835f0e0a452a59f, type: 3}
-      propertyPath: m_Color.r
-      value: 0.6132076
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -67,6 +67,7 @@ namespace MiniPuzzles
             if (IsAllOff())
             {
                 _finished = true;
+                _overlay.SetFeedback("Solved!", false);
                 _onSolved?.Invoke();
             }
         }

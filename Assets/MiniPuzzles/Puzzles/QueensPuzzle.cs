@@ -74,9 +74,13 @@ namespace MiniPuzzles
             _queen[cell] = !_queen[cell];
             Refresh();
 
+            if (_queen[cell] && HasConflict(cell))
+                _overlay.SetFeedback("Queens can't share row, column, region, or touch", true);
+
             if (IsSolved())
             {
                 _finished = true;
+                _overlay.SetFeedback("Solved!", false);
                 _onSolved?.Invoke();
             }
         }

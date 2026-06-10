@@ -70,3 +70,17 @@ Create an empty GameObject "MiniPuzzleManager" (place in your bootstrap scene):
 On any door/interactable add PuzzleDoor, set difficulty/contextLabel/seed,
 and call OnPlayerInteract() from your interaction system. Wire onPuzzleSolved /
 onPuzzleFailed UnityEvents in the Inspector.
+
+----------------------------------------------------------------------
+5. PLAYER STATE + TEST MATRIX
+----------------------------------------------------------------------
+Yin state  -> ZIP (seed even) or Tango (seed odd)
+Yang state -> Queens (seed even) or Lights Out (seed odd)
+
+Per level scene:
+  - MiniPuzzleManager + PlayerStateAdapter + GameEventBusAdapter
+  - PlayerStateAdapter.playerStateSystem -> scene PlayerStateSystem
+  - PuzzleOverlay with help/feedback (auto-created if unwired)
+  - Puzzle_Tango prefab: Yin.png + Yang.png on TangoPuzzle component
+
+Console log on open: [MiniPuzzleManager] Opening <type> for <state> ...

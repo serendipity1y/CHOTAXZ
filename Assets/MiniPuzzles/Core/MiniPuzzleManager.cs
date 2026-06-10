@@ -99,6 +99,7 @@ namespace MiniPuzzles
 
             PlayerState state = _stateProvider.CurrentState;
             PuzzleType type = PuzzleTypeResolver.Resolve(state, seed);
+            Debug.Log($"[MiniPuzzleManager] Opening {type} for {state} (seed {seed}, difficulty {config.difficulty})");
 
             if (!_prefabLookup.TryGetValue(type, out GameObject prefab) || prefab == null)
             {

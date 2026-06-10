@@ -103,3 +103,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0d7496fcc78f514c943d25bebd3327d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiniPuzzles.TangoPuzzle
+  yinSprite: {fileID: 21300000, guid: 456e4853aa6ccd44880cb1046fa0de07, type: 3}
+  yangSprite: {fileID: 21300000, guid: f8cc291a07c34a2438210c9d5d8eee65, type: 3}
