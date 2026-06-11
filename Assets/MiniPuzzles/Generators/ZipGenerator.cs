@@ -37,13 +37,11 @@ namespace MiniPuzzles
             int cells = size * size;
             int[] path = null;
 
-            for (int attempt = 0; attempt < 64 && path == null; attempt++)
+            for (int attempt = 0; attempt < 16 && path == null; attempt++)
             {
                 int start = rng.Next(cells);
                 var visited = new bool[cells];
-                var current = new List<int>(cells);
-                if (TryBuild(start, size, visited, current, rng))
-                    path = current.ToArray();
+                path = TryWarnsdorff(start, size, visited, rng);
             }
 
             if (path == null) path = SnakePath(size);
@@ -178,39 +176,64 @@ namespace MiniPuzzles
             if (c < size - 1) yield return cell + 1;
         }
 
-        private static bool TryBuild(int cell, int size, bool[] visited, List<int> path, Random rng)
+        // Warnsdorff's heuristic: always step to the unvisited neighbour with the fewest
+        // onward moves. Finds Hamiltonian paths on grid graphs in O(n) with no backtracking.
+        private static int[] TryWarnsdorff(int start, int size, bool[] visited, Random rng)
         {
-            visited[cell] = true;
-            path.Add(cell);
+            int cells = size * size;
+            var path = new int[cells];
+            Span<int> buf = stackalloc int[4];
 
-            if (path.Count == size * size) return true;
+            path[0] = start;
+            visited[start] = true;
 
-            foreach (int next in Neighbors(cell, size, rng))
+            for (int step = 1; step < cells; step++)
             {
-                if (!visited[next] && TryBuild(next, size, visited, path, rng))
-                    return true;
-            }
+                int cur = path[step - 1];
+                int nCount = FillNeighbors(cur, size, buf);
 
-            visited[cell] = false;
-            path.RemoveAt(path.Count - 1);
-            return false;
+                // shuffle for random tie-breaking
+                for (int i = nCount - 1; i > 0; i--)
+                {
+                    int j = rng.Next(i + 1);
+                    (buf[i], buf[j]) = (buf[j], buf[i]);
+                }
+
+                int best = -1;
+                int bestDeg = int.MaxValue;
+                for (int i = 0; i < nCount; i++)
+                {
+                    int n = buf[i];
+                    if (visited[n]) continue;
+                    int deg = CountUnvisited(n, size, visited);
+                    if (deg < bestDeg) { bestDeg = deg; best = n; }
+                }
+
+                if (best < 0) return null;
+                visited[best] = true;
+                path[step] = best;
+            }
+            return path;
         }
 
-        private static IEnumerable<int> Neighbors(int cell, int size, Random rng)
+        private static int FillNeighbors(int cell, int size, Span<int> buf)
         {
-            int r = cell / size, c = cell % size;
-            var list = new List<int>(4);
-            if (r > 0) list.Add(cell - size);
-            if (r < size - 1) list.Add(cell + size);
-            if (c > 0) list.Add(cell - 1);
-            if (c < size - 1) list.Add(cell + 1);
+            int r = cell / size, c = cell % size, n = 0;
+            if (r > 0)        buf[n++] = cell - size;
+            if (r < size - 1) buf[n++] = cell + size;
+            if (c > 0)        buf[n++] = cell - 1;
+            if (c < size - 1) buf[n++] = cell + 1;
+            return n;
+        }
 
-            for (int i = list.Count - 1; i > 0; i--)
-            {
-                int j = rng.Next(i + 1);
-                (list[i], list[j]) = (list[j], list[i]);
-            }
-            return list;
+        private static int CountUnvisited(int cell, int size, bool[] visited)
+        {
+            int r = cell / size, c = cell % size, n = 0;
+            if (r > 0        && !visited[cell - size]) n++;
+            if (r < size - 1 && !visited[cell + size]) n++;
+            if (c > 0        && !visited[cell - 1])    n++;
+            if (c < size - 1 && !visited[cell + 1])    n++;
+            return n;
         }
 
         private static int[] SnakePath(int size)

@@ -92,13 +92,31 @@ public class WhipController : MonoBehaviour
     {
         if (_state != WhipState.Idle) return;
 
-        // Snapshot the swing plane from camera facing (flattened to horizontal).
+        // Aim from hand toward camera-center target so whip hits what crosshair points at.
         Vector3 camForward = Camera.main != null
             ? Camera.main.transform.forward
             : playerTransform.forward;
-        _planeForward = Vector3.ProjectOnPlane(camForward, Vector3.up).normalized;
+
+        Vector3 aimPoint;
+        if (Camera.main != null)
+        {
+            Ray camRay = new Ray(Camera.main.transform.position, camForward);
+            LayerMask combinedMask = _attachableLayers | _interactableLayers;
+            aimPoint = Physics.Raycast(camRay, out RaycastHit aimHit, _ropeLength * 1.5f, combinedMask,
+                                       QueryTriggerInteraction.Ignore)
+                ? aimHit.point
+                : camRay.origin + camRay.direction * _ropeLength;
+        }
+        else
+        {
+            aimPoint = whipOrigin.position + playerTransform.forward * _ropeLength;
+        }
+
+        // Direction from hand to aim point, flattened for the horizontal swing plane.
+        Vector3 toAim = aimPoint - whipOrigin.position;
+        _planeForward = Vector3.ProjectOnPlane(toAim, Vector3.up).normalized;
         if (_planeForward.sqrMagnitude < 0.0001f)
-            _planeForward = playerTransform.forward;
+            _planeForward = Vector3.ProjectOnPlane(camForward, Vector3.up).normalized;
         _planeRight = Vector3.Cross(Vector3.up, _planeForward).normalized;
 
         _hasAttachTarget = false;

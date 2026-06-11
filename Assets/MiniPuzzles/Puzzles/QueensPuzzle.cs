@@ -21,6 +21,7 @@ namespace MiniPuzzles
         private Color[] _regionColors;
         private bool _finished;
         private float _startTime;
+        private int _lastStatusTenth = -1;
         private PuzzleOverlay _overlay;
         private Action _onSolved;
 
@@ -48,7 +49,11 @@ namespace MiniPuzzles
         private void Update()
         {
             if (_finished) return;
-            _overlay.SetStatus($"Time: {Time.unscaledTime - _startTime:0.0}s");
+            float elapsed = Time.unscaledTime - _startTime;
+            int tenth = (int)(elapsed * 10f);
+            if (tenth == _lastStatusTenth) return;
+            _lastStatusTenth = tenth;
+            _overlay.SetStatus($"Time: {elapsed:0.0}s");
         }
 
         private void BuildGrid()

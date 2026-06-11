@@ -34,6 +34,7 @@ namespace MiniPuzzles
         private int _nextWaypoint = 1;
         private bool _finished;
         private float _startTime;
+        private int _lastStatusTenth = -1;
         private PuzzleOverlay _overlay;
         private Action _onSolved;
 
@@ -61,10 +62,12 @@ namespace MiniPuzzles
         {
             if (_finished) return;
             float elapsed = Time.unscaledTime - _startTime;
-            string progress = _nextWaypoint <= _waypointCount
+            int tenth = (int)(elapsed * 10f);
+            if (tenth == _lastStatusTenth) return;
+            _lastStatusTenth = tenth;
+            _overlay.SetStatus(_nextWaypoint <= _waypointCount
                 ? $"Next dot: {_nextWaypoint}  |  {elapsed:0.0}s"
-                : $"Fill remaining cells  |  {elapsed:0.0}s";
-            _overlay.SetStatus(progress);
+                : $"Fill remaining cells  |  {elapsed:0.0}s");
         }
 
         private void BuildGrid()

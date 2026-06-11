@@ -78,8 +78,9 @@ namespace MiniPuzzles
                 revealed++;
             }
 
-            // Add clues until the puzzle has exactly one solution.
-            for (int i = revealed; i < cells && CountSolutions(givens, size, 2) != 1; i++)
+            // Add clues until the puzzle has exactly one solution (budget caps main-thread time).
+            int uniquenessBudget = 30;
+            for (int i = revealed; i < cells && uniquenessBudget-- > 0 && CountSolutions(givens, size, 2) != 1; i++)
             {
                 if (givens[indices[i]] != Empty) continue;
                 givens[indices[i]] = solution[indices[i]];
